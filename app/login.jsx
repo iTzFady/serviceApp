@@ -11,10 +11,13 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Image,
+  Keyboard,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -44,85 +47,86 @@ export default function LoginPage() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Image source={logo} style={styles.logo} />
-        <Controller
-          control={control}
-          name="email"
-          rules={{
-            required: "E-mail is required",
-            pattern: { value: /\S+@\S+\.\S+/, message: "Invalid email" },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <InputField
-              text={"البريد الالكتروني"}
-              icon={<FontAwesome name="user-o" size={24} color="black" />}
-              autoCapitalize="none"
-              autoCpmplete="email"
-              inputMode="email"
-              keyboardType="email-address"
-              placeholder="اكتب بريدك الالكتروني"
-              onChangeText={onChange}
-              value={value}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView>
+            <Image source={logo} style={styles.logo} />
+            <Controller
+              control={control}
+              name="email"
+              rules={{
+                required: "E-mail is required",
+                pattern: { value: /\S+@\S+\.\S+/, message: "Invalid email" },
+              }}
+              render={({ field: { onChange, value } }) => (
+                <InputField
+                  text={"البريد الالكتروني"}
+                  icon={<FontAwesome name="user-o" size={24} color="black" />}
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  inputMode="email"
+                  keyboardType="email-address"
+                  placeholder="اكتب بريدك الالكتروني"
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
             />
-          )}
-        />
-        {errors.email && (
-          <Text style={styles.error}>{errors.email.message}</Text>
-        )}
-        <Controller
-          control={control}
-          name="password"
-          rules={{ required: "Password is required", minLength: 6 }}
-          render={({ field: { onChange, value } }) => (
-            <InputField
-              text={"كلمة السر"}
-              icon={
-                <TouchableOpacity
-                  onPress={() => setShowPassword((prevState) => !prevState)}
-                >
-                  <MaterialCommunityIcons
-                    name={showPassword ? "eye-closed" : "eye-outline"}
-                    size={24}
-                    color="black"
-                  />
-                </TouchableOpacity>
-              }
-              autoCapitalize="none"
-              autoCpmplete="none"
-              inputMode="text"
-              keyboardType="text"
-              placeholder="اكتب كلمة السر"
-              secureTextEntry={showPassword}
-              onChangeText={onChange}
-              value={value}
+            {errors.email && (
+              <Text style={styles.error}>{errors.email.message}</Text>
+            )}
+            <Controller
+              control={control}
+              name="password"
+              rules={{ required: "Password is required", minLength: 6 }}
+              render={({ field: { onChange, value } }) => (
+                <InputField
+                  text={"كلمة السر"}
+                  icon={
+                    <TouchableOpacity
+                      onPress={() => setShowPassword((prevState) => !prevState)}
+                    >
+                      <MaterialCommunityIcons
+                        name={showPassword ? "eye-closed" : "eye-outline"}
+                        size={24}
+                        color="black"
+                      />
+                    </TouchableOpacity>
+                  }
+                  autoCapitalize="none"
+                  autoComplete="none"
+                  inputMode="text"
+                  keyboardType="text"
+                  placeholder="اكتب كلمة السر"
+                  secureTextEntry={showPassword}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
             />
-          )}
-        />
-        {errors.password && (
-          <Text style={styles.error}>{errors.password.message}</Text>
-        )}
-        <Link style={styles.forgetPasswordLink} href="/">
-          هل نسيت كلمة السر؟
-        </Link>
-        <View style={styles.buttonContainer}>
-          <Pressable style={styles.button} onPress={handleSubmit(onSubmit)}>
-            <Text style={styles.buttonText}>تسجيل الدخول</Text>
-          </Pressable>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            marginHorizontal: "auto",
-          }}
-        >
-          <Text style={styles.registerLink}>ليس لديك حساب؟</Text>
-          <Link
-            style={[styles.registerLink, { marginLeft: 5 }]}
-            href="/register"
-          >
-            سجل الان
-          </Link>
-        </View>
+            {errors.password && (
+              <Text style={styles.error}>{errors.password.message}</Text>
+            )}
+            <Link style={styles.forgetPasswordLink} href="/">
+              هل نسيت كلمة السر؟
+            </Link>
+            <View style={styles.buttonContainer}>
+              <Pressable style={styles.button} onPress={handleSubmit(onSubmit)}>
+                <Text style={styles.buttonText}>تسجيل الدخول</Text>
+              </Pressable>
+            </View>
+            <View
+              style={{
+                flexDirection: "row-reverse",
+                marginHorizontal: "auto",
+              }}
+            >
+              <Text style={styles.registerLink}>ليس لديك حساب؟</Text>
+              <Link style={styles.registerLink} href="/register">
+                سجل الان
+              </Link>
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
       </View>
     </SafeAreaView>
   );
@@ -170,5 +174,6 @@ const styles = StyleSheet.create({
     color: "#214503",
     fontFamily: "Cairo_300Light",
     fontSize: 14,
+    marginLeft: 5,
   },
 });
