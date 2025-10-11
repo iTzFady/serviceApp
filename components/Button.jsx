@@ -5,6 +5,7 @@ export default function Button({
   color,
   backgroundColor,
   fontSize,
+  width,
   height,
   onpress,
 }) {
@@ -22,7 +23,7 @@ export default function Button({
         paddingHorizontal: 20,
         marginBlock: 5,
         marginHorizontal: "auto",
-        width: "100%",
+        width: width ? width : "100%",
         height: height ? height : 45,
         alignItems: "center",
       }}

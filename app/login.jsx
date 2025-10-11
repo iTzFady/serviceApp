@@ -18,7 +18,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+const logo = require("../assets/images/logo.png");
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(true);
   const [loaded, error] = useFonts({
@@ -44,10 +44,7 @@ export default function LoginPage() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Image
-          source={require("../assets/images/logo.png")}
-          style={styles.logo}
-        />
+        <Image source={logo} style={styles.logo} />
         <Controller
           control={control}
           name="email"
@@ -114,29 +111,16 @@ export default function LoginPage() {
         </View>
         <View
           style={{
-            flexDirection: "row-reverse",
+            flexDirection: "row",
             marginHorizontal: "auto",
           }}
         >
-          <Text
-            style={{
-              color: "#214503",
-              fontFamily: "Cairo_300Light",
-              fontSize: 14,
-            }}
-          >
-            ليس لديك حساب؟
-          </Text>
+          <Text style={styles.registerLink}>ليس لديك حساب؟</Text>
           <Link
-            style={{
-              color: "#2C5b04",
-              fontFamily: "Cairo_300Light",
-              fontSize: 14,
-              marginRight: 3,
-            }}
-            href="/"
+            style={[styles.registerLink, { marginLeft: 5 }]}
+            href="/register"
           >
-            سحل الان
+            سجل الان
           </Link>
         </View>
       </View>
@@ -146,7 +130,6 @@ export default function LoginPage() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#Bde3e4",
   },
   container: {
     marginTop: 180,
@@ -182,5 +165,10 @@ const styles = StyleSheet.create({
     color: "red",
     marginBottom: 10,
     marginLeft: 12,
+  },
+  registerLink: {
+    color: "#214503",
+    fontFamily: "Cairo_300Light",
+    fontSize: 14,
   },
 });
