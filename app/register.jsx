@@ -1,4 +1,5 @@
 import Button from "@/components/Button";
+import DynamicIcon from "@/components/DynamicIcon";
 import InputField from "@/components/InputField";
 import Separator from "@/components/Separator";
 import {
@@ -28,7 +29,6 @@ const logo = require("../assets/images/logo.png");
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(true);
   const [role, setRole] = useState("Client");
-  const [speciality, SetSpeciality] = useState(null);
   const [loaded, error] = useFonts({
     Cairo_200ExtraLight,
     Cairo_300Light,
@@ -47,11 +47,24 @@ export default function RegisterPage() {
       password: "",
       confirmPassword: "",
       Role: role,
+      speciality: "",
+      nationalNumber: "",
     },
   });
-  console.log(Speciality);
   const onSubmit = (data) => {
     console.log(data);
+  };
+  const renderDropdownItems = (item) => {
+    return (
+      <View style={styles.dropdownItemContainer}>
+        <DynamicIcon
+          style={styles.dropdownItemIcon}
+          size={20}
+          path={item.icon}
+        />
+        <Text style={styles.dropdownItem}>{item.label}</Text>
+      </View>
+    );
   };
   const workersData = () => {
     return (
@@ -79,30 +92,37 @@ export default function RegisterPage() {
             />
           )}
         />
-        <View style={styles.dropdownContainer}>
-          <Text style={styles.dropdownLabel}>المهنة</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={Speciality}
-            placeholderStyle={styles.dropdownPlaceholder}
-            selectedTextStyle={styles.dropdownSelectText}
-            itemTextStyle={styles.dropdownItem}
-            maxHeight={250}
-            labelField="label"
-            valueField="value"
-            placeholder="اختر مهنتك"
-            value={speciality}
-            onChange={(item) => SetSpeciality(item.value)}
-            activeColor="#e0f7fa"
-          />
-        </View>
+        <Controller
+          control={control}
+          name="speciality"
+          render={({ field: { onChange, value } }) => (
+            <View style={styles.dropdownContainer}>
+              <Text style={styles.dropdownLabel}>المهنة</Text>
+              <Dropdown
+                style={styles.dropdown}
+                data={Speciality}
+                placeholderStyle={styles.dropdownPlaceholder}
+                selectedTextStyle={styles.dropdownSelectText}
+                itemTextStyle={styles.dropdownItem}
+                maxHeight={250}
+                labelField="label"
+                valueField="value"
+                placeholder="اختر مهنتك"
+                value={value}
+                renderItem={renderDropdownItems}
+                onChange={(item) => onChange(item.value)}
+                activeColor="#e0f7fa"
+              />
+            </View>
+          )}
+        />
       </>
     );
   };
-  let selectedOption = true;
   if (!loaded && !error) {
     return null;
   }
+
   return (
     <SafeAreaView style={styles.container}>
       <Image style={styles.logo} source={logo} />
@@ -376,11 +396,19 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: "Cairo_200ExtraLight",
   },
+  dropdownItemContainer: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    margin: 10,
+  },
   dropdownItem: {
     color: "#333",
     textAlign: "right",
     fontSize: 20,
-    marginRight: 8,
+    marginRight: 15,
     fontFamily: "Cairo_200ExtraLight",
+  },
+  dropdownItemIcon: {
+    padding: 10,
   },
 });
