@@ -25,6 +25,7 @@ import {
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Shadow } from "react-native-shadow-2";
 import { Regions } from "../data/regions";
 import { Speciality } from "../data/speciality";
 const logo = require("../assets/images/logo.png");
@@ -187,31 +188,46 @@ export default function RegisterPage() {
   return (
     <SafeAreaView style={styles.container}>
       <Image style={styles.logo} source={logo} />
+
       <View style={styles.optionContainer}>
-        <Pressable
-          style={[
-            styles.option,
-            role === "Client" ? styles.selectedOption : null,
-          ]}
-          onPress={() => {
-            reset();
-            setRole("Client");
-          }}
+        <Shadow
+          style={{ width: "100%" }}
+          distance={role === "Client" ? 2 : 0}
+          startColor="rgba(0,0,0,0.25)"
+          endColor="rgba(0,0,0,0)"
         >
-          <Text style={styles.optionText}>تسجيل كـ عميل</Text>
-        </Pressable>
-        <Pressable
-          style={[
-            styles.option,
-            role === "Worker" ? styles.selectedOption : null,
-          ]}
-          onPress={() => {
-            reset();
-            setRole("Worker");
-          }}
+          <Pressable
+            style={[
+              styles.option,
+              role === "Client" ? styles.selectedOption : null,
+            ]}
+            onPress={() => {
+              reset();
+              setRole("Client");
+            }}
+          >
+            <Text style={styles.optionText}>تسجيل كـ عميل</Text>
+          </Pressable>
+        </Shadow>
+        <Shadow
+          style={{ width: "100%" }}
+          distance={role === "Worker" ? 2 : 0}
+          startColor="rgba(0,0,0,0.25)"
+          endColor="rgba(0,0,0,0)"
         >
-          <Text style={styles.optionText}>تسجيل كـ صنايعي</Text>
-        </Pressable>
+          <Pressable
+            style={[
+              styles.option,
+              role === "Worker" ? styles.selectedOption : null,
+            ]}
+            onPress={() => {
+              reset();
+              setRole("Worker");
+            }}
+          >
+            <Text style={styles.optionText}>تسجيل كـ صنايعي</Text>
+          </Pressable>
+        </Shadow>
       </View>
       <Separator separatorWidth="75%" margin={20} />
       <KeyboardAvoidingView

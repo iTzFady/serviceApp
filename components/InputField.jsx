@@ -1,5 +1,6 @@
 import { Cairo_500Medium, useFonts } from "@expo-google-fonts/cairo";
 import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Shadow } from "react-native-shadow-2";
 export default function InputField({
   text,
   autoCapitalize,
@@ -23,20 +24,27 @@ export default function InputField({
   return (
     <View style={styles.container}>
       <Text style={styles.TextFieldLabel}>{text}</Text>
-      <View style={styles.TextFieldContainer}>
-        <TextInput
-          style={styles.TextField}
-          autoCapitalize={autoCapitalize}
-          autoComplete={autoComplete}
-          inputMode={inputMode}
-          keyboardType={keyboardType}
-          secureTextEntry={secureTextEntry}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          value={value}
-        ></TextInput>
-        {icon}
-      </View>
+      <Shadow
+        style={{ width: "100%" }}
+        distance={4}
+        startColor="rgba(0,0,0,0.25)"
+        endColor="rgba(0,0,0,0)"
+      >
+        <View style={styles.TextFieldContainer}>
+          <TextInput
+            style={styles.TextField}
+            autoCapitalize={autoCapitalize}
+            autoComplete={autoComplete}
+            inputMode={inputMode}
+            keyboardType={keyboardType}
+            secureTextEntry={secureTextEntry}
+            onChangeText={onChangeText}
+            placeholder={placeholder}
+            value={value}
+          ></TextInput>
+          {icon}
+        </View>
+      </Shadow>
     </View>
   );
 }

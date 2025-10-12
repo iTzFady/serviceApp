@@ -1,3 +1,4 @@
+import Button from "@/components/Button";
 import InputField from "@/components/InputField";
 import {
   Cairo_300Light,
@@ -11,7 +12,6 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Image,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -103,17 +103,30 @@ export default function LoginPage() {
               />
             )}
           />
-          {errors.password && (
-            <Text style={styles.error}>{errors.password.message}</Text>
-          )}
-          <Link style={styles.forgetPasswordLink} href="/">
-            هل نسيت كلمة السر؟
-          </Link>
-          <View style={styles.buttonContainer}>
-            <Pressable style={styles.button} onPress={handleSubmit(onSubmit)}>
-              <Text style={styles.buttonText}>تسجيل الدخول</Text>
-            </Pressable>
+          <View
+            style={{
+              flexDirection: "row-reverse",
+              width: "100%",
+              marginHorizontal: "auto",
+            }}
+          >
+            <Link style={styles.forgetPasswordLink} href="/">
+              هل نسيت كلمة السر؟
+            </Link>
+            {errors.password && (
+              <Text style={styles.error}>{errors.password.message}</Text>
+            )}
           </View>
+          <View style={styles.buttonContainer}>
+            <Button
+              text="تسجيل الدخول"
+              color="#fff"
+              backgroundColor="rgba(127,186,78,1)"
+              fontSize={24}
+              onPressEvent={handleSubmit(onSubmit)}
+            />
+          </View>
+
           <View
             style={{
               flexDirection: "row-reverse",
@@ -146,28 +159,19 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 20,
   },
-  button: {
-    height: 45,
-    backgroundColor: "#7fba4e",
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  buttonText: {
-    fontFamily: "Cairo_700Bold",
-    fontSize: 24,
-    color: "#fff",
-  },
   forgetPasswordLink: {
     color: "#214503",
     fontFamily: "Cairo_300Light",
     fontSize: 12,
     marginRight: 30,
     textAlign: "right",
+    width: "50%",
   },
   error: {
     color: "red",
-    marginBottom: 10,
-    marginLeft: 12,
+    marginTop: 5,
+    marginLeft: 25,
+    width: "50%",
   },
   registerLink: {
     color: "#214503",
