@@ -53,7 +53,7 @@ export default function IntroScree() {
               color={"#fff"}
               fontSize={24}
               height={45}
-              onpress={() => {
+              onPressEvent={() => {
                 router.replace("/register");
               }}
             />
@@ -63,7 +63,7 @@ export default function IntroScree() {
               color={"rgba(81,135,245,1)"}
               fontSize={24}
               height={45}
-              onpress={() => {
+              onPressEvent={() => {
                 router.replace("/login");
               }}
             />
@@ -76,7 +76,7 @@ export default function IntroScree() {
               color={"#fff"}
               fontSize={24}
               height={45}
-              onpress={() => {
+              onPressEvent={() => {
                 const nextIndex = index + 1;
                 sliderRef.current?.goToSlide(nextIndex, true);
                 setIndex(nextIndex);
@@ -88,7 +88,7 @@ export default function IntroScree() {
               color={"rgba(81,135,245,1)"}
               fontSize={24}
               height={45}
-              onpress={() => {
+              onPressEvent={() => {
                 const lastIndex = slides.length - 1;
                 sliderRef.current?.goToSlide(lastIndex, true);
                 setIndex(lastIndex);

@@ -10,7 +10,7 @@ import {
   useFonts,
 } from "@expo-google-fonts/cairo";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Image,
@@ -41,6 +41,7 @@ export default function RegisterPage() {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm({
     defaultValues: {
       name: "",
@@ -79,7 +80,6 @@ export default function RegisterPage() {
           rules={{
             required: "National number is required",
             pattern: {
-              //   value: /^[23]\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{6}$/,
               message: "Invalid National number",
             },
           }}
@@ -96,6 +96,9 @@ export default function RegisterPage() {
             />
           )}
         />
+        {errors.NationalNumber && (
+          <Text style={styles.error}>{errors.NationalNumber.message}</Text>
+        )}
         <Controller
           control={control}
           name="speciality"
@@ -130,6 +133,9 @@ export default function RegisterPage() {
             )
           }
         />
+        {errors.speciality && (
+          <Text style={styles.error}>{errors.speciality.message}</Text>
+        )}
         <Controller
           control={control}
           name="region"
@@ -163,9 +169,17 @@ export default function RegisterPage() {
             )
           }
         />
+        {errors.region && (
+          <Text style={styles.error}>{errors.region.message}</Text>
+        )}
       </>
     );
   };
+
+  useEffect(() => {
+    setValue("Role", role);
+  }, [role, setValue]);
+
   if (!loaded && !error) {
     return null;
   }
@@ -457,5 +471,11 @@ const styles = StyleSheet.create({
   },
   dropdownItemIcon: {
     padding: 10,
+  },
+  error: {
+    color: "red",
+    marginBottom: 10,
+    marginLeft: 20,
+    fontFamily: "Cairo_300Light",
   },
 });
