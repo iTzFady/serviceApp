@@ -2,6 +2,7 @@ import Button from "@/components/Button";
 import DynamicIcon from "@/components/DynamicIcon";
 import InputField from "@/components/InputField";
 import Separator from "@/components/Separator";
+import WebSelect from "@/components/WebSelect";
 import {
   Cairo_200ExtraLight,
   Cairo_300Light,
@@ -24,6 +25,7 @@ import {
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Regions } from "../data/regions";
 import { Speciality } from "../data/speciality";
 const logo = require("../assets/images/logo.png");
 export default function RegisterPage() {
@@ -47,12 +49,14 @@ export default function RegisterPage() {
       password: "",
       confirmPassword: "",
       Role: role,
+      NationalNumber: "",
       speciality: "",
-      nationalNumber: "",
+      region: "",
     },
   });
   const onSubmit = (data) => {
-    console.log(data);
+    const payload = { ...data, role: role };
+    console.log(payload);
   };
   const renderDropdownItems = (item) => {
     return (
@@ -75,7 +79,7 @@ export default function RegisterPage() {
           rules={{
             required: "National number is required",
             pattern: {
-              value: /^(?:\[23][0-9]{13}$)/,
+              //   value: /^[23]\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{6}$/,
               message: "Invalid National number",
             },
           }}
@@ -95,26 +99,69 @@ export default function RegisterPage() {
         <Controller
           control={control}
           name="speciality"
-          render={({ field: { onChange, value } }) => (
-            <View style={styles.dropdownContainer}>
-              <Text style={styles.dropdownLabel}>المهنة</Text>
-              <Dropdown
-                style={styles.dropdown}
+          render={({ field: { onChange, value } }) =>
+            Platform.OS === "web" ? (
+              <WebSelect
                 data={Speciality}
-                placeholderStyle={styles.dropdownPlaceholder}
-                selectedTextStyle={styles.dropdownSelectText}
-                itemTextStyle={styles.dropdownItem}
-                maxHeight={250}
-                labelField="label"
-                valueField="value"
-                placeholder="اختر مهنتك"
+                onChange={onChange}
                 value={value}
-                renderItem={renderDropdownItems}
-                onChange={(item) => onChange(item.value)}
-                activeColor="#e0f7fa"
+                label="المهنة"
+                placeHolder="اختر مهنتك"
               />
-            </View>
-          )}
+            ) : (
+              <View style={styles.dropdownContainer}>
+                <Text style={styles.dropdownLabel}>المهنة</Text>
+                <Dropdown
+                  style={styles.dropdown}
+                  data={Speciality}
+                  placeholderStyle={styles.dropdownPlaceholder}
+                  selectedTextStyle={styles.dropdownSelectText}
+                  itemTextStyle={styles.dropdownItem}
+                  maxHeight={250}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="اختر مهنتك"
+                  value={value}
+                  renderItem={renderDropdownItems}
+                  onChange={(item) => onChange(item.value)}
+                  activeColor="#e0f7fa"
+                />
+              </View>
+            )
+          }
+        />
+        <Controller
+          control={control}
+          name="region"
+          render={({ field: { onChange, value } }) =>
+            Platform.OS === "web" ? (
+              <WebSelect
+                data={Regions}
+                onChange={onChange}
+                value={value}
+                label="المنطقة"
+                placeHolder="اختر منطقتك"
+              />
+            ) : (
+              <View style={styles.dropdownContainer}>
+                <Text style={styles.dropdownLabel}>المنطقة</Text>
+                <Dropdown
+                  style={styles.dropdown}
+                  data={Regions}
+                  placeholderStyle={styles.dropdownPlaceholder}
+                  selectedTextStyle={styles.dropdownSelectText}
+                  itemTextStyle={styles.dropdownItem}
+                  maxHeight={250}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="اختر منطقتك"
+                  value={value}
+                  onChange={(item) => onChange(item.value)}
+                  activeColor="#e0f7fa"
+                />
+              </View>
+            )
+          }
         />
       </>
     );
@@ -308,7 +355,7 @@ export default function RegisterPage() {
             color="#fff"
             backgroundColor="rgba(127,186,78,1)"
             fontSize={24}
-            onpress={handleSubmit(onSubmit)}
+            onPressEvent={handleSubmit(onSubmit)}
           />
         </View>
       </KeyboardAvoidingView>

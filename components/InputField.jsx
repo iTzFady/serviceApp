@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
     height: "100%",
     textAlign: "right",
     fontFamily: "Cairo_500Medium",
+    writingDirection: "rtl",
     fontSize: 20,
   },
 });

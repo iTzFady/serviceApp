@@ -7,7 +7,7 @@ export default function Button({
   fontSize,
   width,
   height,
-  onpress,
+  onPressEvent,
 }) {
   const [loaded, error] = useFonts({
     Cairo_700Bold,
@@ -27,7 +27,7 @@ export default function Button({
         height: height ? height : 45,
         alignItems: "center",
       }}
-      onPress={onpress}
+      onPress={onPressEvent}
     >
       <Text
         style={{
