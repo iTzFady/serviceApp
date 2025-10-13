@@ -117,6 +117,7 @@ export default function RegisterPage() {
                 <Text style={styles.dropdownLabel}>المهنة</Text>
                 <Dropdown
                   style={styles.dropdown}
+                  mode="modal"
                   data={Speciality}
                   placeholderStyle={styles.dropdownPlaceholder}
                   selectedTextStyle={styles.dropdownSelectText}
@@ -154,6 +155,7 @@ export default function RegisterPage() {
                 <Text style={styles.dropdownLabel}>المنطقة</Text>
                 <Dropdown
                   style={styles.dropdown}
+                  mode="modal"
                   data={Regions}
                   placeholderStyle={styles.dropdownPlaceholder}
                   selectedTextStyle={styles.dropdownSelectText}
@@ -445,6 +447,7 @@ const styles = StyleSheet.create({
     alignContent: "center",
     width: "100%",
     paddingHorizontal: 20,
+    marginBlock: "25",
   },
   dropdownLabel: {
     fontFamily: "Cairo_500Medium",

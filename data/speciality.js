@@ -6,7 +6,7 @@ import PlumberIcon from "../assets/images/icons/plumber.svg";
 import TechnicianIcon from "../assets/images/icons/Technician.svg";
 export const Icons = {
   Painter: PainterIcon,
-  Electrian: ElectrianIcon,
+  Electrician: ElectrianIcon,
   Plumber: PlumberIcon,
   Carpenter: CarpenterIcon,
   HVAC: HVACIcon,
@@ -17,37 +17,37 @@ export const Speciality = [
   {
     id: 1,
     label: "نقاش",
-    value: "نقاش",
+    value: "Painter",
     icon: "Painter",
   },
   {
     id: 2,
     label: "كهربائي",
-    value: "كهربائي",
-    icon: "Electrian",
+    value: "Electrician",
+    icon: "Electrician",
   },
   {
     id: 3,
     label: "سباك",
-    value: "سباك",
+    value: "Plumber",
     icon: "Plumber",
   },
   {
     id: 4,
     label: "نجار",
-    value: "نجار",
+    value: "Carpenter",
     icon: "Carpenter",
   },
   {
     id: 5,
     label: "تبريد وتكييف",
-    value: "تبريد وتكييف",
+    value: "HVAC_Technician",
     icon: "HVAC",
   },
   {
     id: 6,
     label: "صيانة اجهزة",
-    value: "صيانة اجهزة",
+    value: "Technician",
     icon: "Technician",
   },
 ];

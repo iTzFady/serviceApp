@@ -1,0 +1,172 @@
+import {
+  Cairo_300Light,
+  Cairo_500Medium,
+  useFonts,
+} from "@expo-google-fonts/cairo";
+import { Speciality } from "../data/speciality";
+
+import Entypo from "@expo/vector-icons/Entypo";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { Image, StyleSheet, Text, View } from "react-native";
+import Avaliablity from "./avaliablilty";
+import Button from "./Button";
+import DynamicIcon from "./DynamicIcon";
+const profilePic = require("../assets/images/default-profile.png");
+export default function WorkerCard({
+  name,
+  speciality,
+  availability,
+  rating,
+  region,
+}) {
+  const work = Speciality.find((w) => w.value === speciality);
+  const [loaded, error] = useFonts({
+    Cairo_500Medium,
+    Cairo_300Light,
+  });
+  if (!loaded && !error) {
+    return null;
+  }
+  return (
+    <View style={styles.cardContainer}>
+      <View style={styles.workerDataContainer}>
+        <Image
+          style={styles.image}
+          alt="Profile Picture"
+          resizeMode="contain"
+          source={profilePic}
+        />
+        <Text style={styles.workerName}>{name}</Text>
+        <View style={styles.ratingContainer}>
+          <View style={{ position: "relative", width: 24, height: 24 }}>
+            <MaterialCommunityIcons
+              name="star"
+              size={24}
+              color="rgba(237, 237, 14, 0.81)"
+              style={{ position: "absolute" }}
+            />
+            <MaterialCommunityIcons
+              name="star-outline"
+              size={24}
+              color="black"
+              style={{ position: "absolute" }}
+            />
+          </View>
+          <Text style={styles.ratingText}>{rating}</Text>
+        </View>
+        <Avaliablity isAvaliable={availability} style={styles.availability} />
+      </View>
+      <View style={styles.category}>
+        <Text style={styles.categoryText}>{work?.label}</Text>
+        <DynamicIcon path={work?.icon} size={18} />
+      </View>
+      <View style={styles.workerDetails}>
+        <Entypo name="location" size={18} color="black" />
+        <Text style={[styles.categoryText, { marginRight: 10 }]}>
+          الاسكندرية، {region}
+        </Text>
+        <View
+          style={{
+            position: "relative",
+            width: 18,
+            height: 18,
+            marginRight: 10,
+          }}
+        >
+          <MaterialCommunityIcons
+            name="phone"
+            size={18}
+            color="limegreen"
+            style={{ position: "absolute" }}
+          />
+          <MaterialCommunityIcons
+            name="phone-outline"
+            size={18}
+            color="black"
+            style={{ position: "absolute" }}
+          />
+        </View>
+        <Text style={[styles.categoryText, { marginRight: 10 }]}>
+          01*********
+        </Text>
+      </View>
+      <View style={styles.button}>
+        <Button
+          text="طلب الخدمه"
+          height={25}
+          backgroundColor="rgba(159, 223, 105, 1)"
+          borderRadius={5}
+          fontSize={12}
+        />
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  cardContainer: {
+    height: 140,
+    marginVertical: 10,
+    backgroundColor: "rgba(255, 255, 255, 1)",
+    borderRadius: 5,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  image: {
+    width: 20,
+    height: 20,
+  },
+  workerDataContainer: {
+    flexDirection: "row-reverse",
+    alignContent: "center",
+    padding: 12,
+    width: "100%",
+    position: "relative",
+    alignItems: "center",
+  },
+  workerName: {
+    fontSize: 12,
+    marginRight: 5,
+    fontFamily: "Cairo_500Medium",
+  },
+  ratingContainer: {
+    marginRight: 15,
+    flexDirection: "row-reverse",
+    alignItems: "center",
+  },
+  ratingText: {
+    marginRight: 10,
+    fontFamily: "Cairo_300Light",
+    fontSize: 10,
+  },
+  availability: {
+    position: "absolute",
+    left: 10,
+    top: 12,
+    zIndex: 10,
+  },
+  category: {
+    flexDirection: "row-reverse",
+    right: 40,
+    top: 35,
+    zIndex: 10,
+    position: "absolute",
+    alignItems: "center",
+  },
+  categoryText: {
+    fontFamily: "Cairo_300Light",
+    fontSize: 10,
+  },
+  workerDetails: {
+    flexDirection: "row-reverse",
+    marginRight: 15,
+    marginBlock: 8,
+    alignItems: "center",
+  },
+  button: {
+    padding: 15,
+  },
+});
