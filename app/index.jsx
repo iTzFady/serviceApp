@@ -3,13 +3,15 @@ import SpecialityChip from "@/components/specialityChip.jsx";
 import WebSelect from "@/components/WebSelect";
 import WorkerCard from "@/components/WorkerCard";
 import {
+  Cairo_200ExtraLight,
   Cairo_300Light,
   Cairo_600SemiBold,
   useFonts,
 } from "@expo-google-fonts/cairo";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useState } from "react";
+import { useRouter } from "expo-router";
+import { useCallback, useState } from "react";
 import {
   FlatList,
   Image,
@@ -27,7 +29,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Regions } from "../data/regions";
 import { Speciality } from "../data/speciality";
 import { Workers } from "../data/workers";
-
 const logo = require("../assets/images/logo.png");
 const name = "فادي سامي";
 export default function Index() {
@@ -35,21 +36,44 @@ export default function Index() {
   const [currentRegion, setCurrentRegion] = useState(null);
   const [loaded, error] = useFonts({
     Cairo_300Light,
+    Cairo_200ExtraLight,
     Cairo_600SemiBold,
   });
-
-  const renderItem = ({ item }) => {
-    return (
-      <WorkerCard
-        key={item.id}
-        name={item.Name}
-        speciality={item.WorkerSpecialty}
-        availability={item.IsAvailable}
-        rating={item.AverageRating}
-        region={item.region}
-      />
-    );
-  };
+  const router = useRouter();
+  const keyExtractor = useCallback((item) => item.Id.toString(), []);
+  const handlePress = useCallback(
+    (id, name, job, rating) => {
+      router.push({
+        pathname: `/requestWorker/${id}`,
+        params: { name, job, rating },
+      });
+    },
+    [router]
+  );
+  const renderItem = useCallback(
+    ({ item }) => {
+      return (
+        <WorkerCard
+          key={item.Id}
+          id={item.Id}
+          name={item.Name}
+          speciality={item.WorkerSpecialty}
+          availability={item.IsAvailable}
+          rating={item.AverageRating}
+          region={item.region}
+          onPress={() =>
+            handlePress(
+              item.Id,
+              item.Name,
+              item.WorkerSpecialty,
+              item.AverageRating
+            )
+          }
+        />
+      );
+    },
+    [handlePress]
+  );
   if (!loaded && !error) {
     return null;
   }
@@ -57,7 +81,7 @@ export default function Index() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.topStyle}>
         <Image style={styles.logo} source={logo} />
-        <TouchableOpacity style={styles.backButton} onPress={() => {}}>
+        <TouchableOpacity style={styles.settingsButton} onPress={() => {}}>
           <FontAwesome name="sliders" size={24} color="rgba(51, 109, 3, 1)" />
         </TouchableOpacity>
       </View>
@@ -122,7 +146,7 @@ export default function Index() {
               maxHeight={250}
               labelField="label"
               valueField="value"
-              placeholder="..اختر منطقتك"
+              placeholder="اختر منطقتك"
               onChange={(item) => setCurrentRegion(item)}
               activeColor="#e0f7fa"
             />
@@ -146,11 +170,15 @@ export default function Index() {
             </ScrollView>
           ) : (
             <Animated.FlatList
+              keyExtractor={keyExtractor}
               itemLayoutAnimation={LinearTransition}
               style={styles.workerCardContainer}
               renderItem={renderItem}
               data={Workers}
               showsVerticalScrollIndicator={false}
+              initialNumToRender={8}
+              windowSize={5}
+              removeClippedSubviews={true}
             />
           )}
         </View>
@@ -172,7 +200,7 @@ const styles = StyleSheet.create({
     marginHorizontal: "auto",
     resizeMode: "contain",
   },
-  backButton: {
+  settingsButton: {
     position: "absolute",
     left: 5,
     marginLeft: 20,

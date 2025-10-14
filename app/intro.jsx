@@ -8,11 +8,21 @@ import {
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import AppIntroSlider from "react-native-app-intro-slider";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { slides } from "../data/slides";
 const logo = require("../assets/images/logo.png");
+const { width, height } = Dimensions.get("window");
+
 export default function IntroScree() {
   const [loaded, error] = useFonts({
     Cairo_700Bold,
@@ -28,7 +38,7 @@ export default function IntroScree() {
     return (
       <View style={[styles.slide, { backgroundColor: item.backgroundColor }]}>
         <Image style={styles.image} source={item.image} />
-        <Separator separatorWidth="85%" margin={20} />
+        <Separator separatorWidth="85%" margin={15} />
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.text}>{item.text}</Text>
       </View>
@@ -121,15 +131,17 @@ export default function IntroScree() {
           </TouchableOpacity>
         )}
       </View>
-      <AppIntroSlider
-        ref={sliderRef}
-        data={slides}
-        showSkipButton={false}
-        renderItem={createSlider}
-        renderPagination={renderPagination}
-        onSlideChange={(index) => setIndex(index)}
-        scrollEnabled={false}
-      />
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <AppIntroSlider
+          ref={sliderRef}
+          data={slides}
+          showSkipButton={false}
+          renderItem={createSlider}
+          renderPagination={renderPagination}
+          onSlideChange={(index) => setIndex(index)}
+          scrollEnabled={false}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -161,28 +173,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: width * 0.07,
     color: "#000000",
     fontFamily: "Cairo_700Bold",
     textAlign: "center",
   },
   text: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: "#000000",
     fontFamily: "Cairo_600SemiBold",
     textAlign: "center",
   },
   image: {
-    width: 265,
-    height: 300,
+    width: width * 0.65,
+    height: height * 0.4,
     resizeMode: "contain",
   },
   footer: {
     position: "relative",
-    bottom: 40,
+    bottom: 0,
     width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
   },
   dotsContainer: {
     flexDirection: "row",
@@ -202,8 +212,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(81,135,245,1)",
   },
   buttonsContainer: {
-    paddingHorizontal: 20,
-    gap: 20,
+    paddingHorizontal: width * 0.05,
     width: "100%",
   },
 });

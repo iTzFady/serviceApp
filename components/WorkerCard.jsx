@@ -7,17 +7,20 @@ import { Speciality } from "../data/speciality";
 
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { memo } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import Avaliablity from "./avaliablilty";
 import Button from "./Button";
 import DynamicIcon from "./DynamicIcon";
 const profilePic = require("../assets/images/default-profile.png");
-export default function WorkerCard({
+function WorkerCard({
+  id,
   name,
   speciality,
   availability,
   rating,
   region,
+  onPress,
 }) {
   const work = Speciality.find((w) => w.value === speciality);
   const [loaded, error] = useFonts({
@@ -97,6 +100,7 @@ export default function WorkerCard({
           backgroundColor="rgba(159, 223, 105, 1)"
           borderRadius={5}
           fontSize={12}
+          onPressEvent={onPress}
         />
       </View>
     </View>
@@ -159,6 +163,7 @@ const styles = StyleSheet.create({
   categoryText: {
     fontFamily: "Cairo_300Light",
     fontSize: 10,
+    marginLeft: 5,
   },
   workerDetails: {
     flexDirection: "row-reverse",
@@ -170,3 +175,4 @@ const styles = StyleSheet.create({
     padding: 15,
   },
 });
+export default memo(WorkerCard);

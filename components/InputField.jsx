@@ -12,6 +12,8 @@ export default function InputField({
   icon,
   secureTextEntry,
   value,
+  textStyle = { fontFamily: "Cairo_500Medium", fontSize: 20 },
+  labelStyle = { fontSize: 20 },
 }) {
   const [loaded, error] = useFonts({
     Cairo_500Medium,
@@ -23,7 +25,7 @@ export default function InputField({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.TextFieldLabel}>{text}</Text>
+      <Text style={[styles.TextFieldLabel, labelStyle]}>{text}</Text>
       <Shadow
         style={{ width: "100%" }}
         distance={4}
@@ -32,7 +34,7 @@ export default function InputField({
       >
         <View style={styles.TextFieldContainer}>
           <TextInput
-            style={styles.TextField}
+            style={[styles.TextField, textStyle]}
             autoCapitalize={autoCapitalize}
             autoComplete={autoComplete}
             inputMode={inputMode}
@@ -76,8 +78,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: "100%",
     textAlign: "right",
-    fontFamily: "Cairo_500Medium",
     writingDirection: "rtl",
-    fontSize: 20,
   },
 });

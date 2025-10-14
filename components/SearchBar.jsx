@@ -51,7 +51,6 @@ export default function SearchBar() {
         <TouchableOpacity
           onPress={() => {
             toggleSearch(!focused);
-            console.log("pressed");
           }}
         >
           <MaterialIcons name="search" size={14} color="#333" />

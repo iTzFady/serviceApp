@@ -234,7 +234,7 @@ export default function RegisterPage() {
       <Separator separatorWidth="75%" margin={20} />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={[styles.formContainer]}
+        style={styles.formContainer}
       >
         <ScrollView>
           <Text style={styles.title}>البيانات الشخصيه</Text>
@@ -254,7 +254,7 @@ export default function RegisterPage() {
                 autoCapitalize="words"
                 autoComplete="name"
                 inputMode="text"
-                keyboardType="defaul"
+                keyboardType="default"
                 placeholder="اكتب اسمك كامل"
                 onChangeText={onChange}
                 value={value}

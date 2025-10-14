@@ -10,10 +10,11 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: "#Bde3e4" },
         }}
       >
-        {/* <Stack.Screen name="index" /> */}
+        <Stack.Screen name="intro" />
         <Stack.Screen name="login" />
-        {/* <Stack.Screen name="intro" /> */}
-        {/* <Stack.Screen name="register" /> */}
+        <Stack.Screen name="register" />
+        <Stack.Screen name="index" />
+        <Stack.Screen name="requestWorker/[id]" />
       </Stack>
     </SafeAreaProvider>
   );

@@ -10,6 +10,7 @@ export default function Button({
   height = 45,
   onPressEvent,
   borderRadius = 10,
+  style,
 }) {
   const [loaded, error] = useFonts({
     Cairo_700Bold,
@@ -25,15 +26,16 @@ export default function Button({
       endColor="rgba(0,0,0,0)"
     >
       <Pressable
-        style={{
-          backgroundColor: backgroundColor,
-          borderRadius: borderRadius,
-          paddingHorizontal: 20,
-          marginHorizontal: "auto",
-          width: width,
-          height: height,
-          alignItems: "center",
-        }}
+        style={[
+          {
+            backgroundColor: backgroundColor,
+            borderRadius: borderRadius,
+            width: width,
+            height: height,
+            marginBottom: 15,
+          },
+          style,
+        ]}
         onPress={onPressEvent}
       >
         <Text

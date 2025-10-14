@@ -12,12 +12,10 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Image,
-  Keyboard,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -48,9 +46,7 @@ export default function LoginPage() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <ScrollView>
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <Image source={logo} style={styles.logo} />
-          </TouchableWithoutFeedback>
+          <Image source={logo} style={styles.logo} />
           <Controller
             control={control}
             name="email"
@@ -149,7 +145,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    marginTop: 180,
+    marginTop: "40%",
   },
   logo: {
     marginHorizontal: "auto",
