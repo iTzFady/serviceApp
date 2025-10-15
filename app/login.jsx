@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    marginTop: "40%",
+    marginTop: 180,
   },
   logo: {
     marginHorizontal: "auto",

@@ -1,10 +1,15 @@
+import RequestCard from "@/components/RequestCard";
+import RequestMedal from "@/components/RequestModal";
 import Switch from "@/components/Switch";
+import UserMedal from "@/components/UserMedal";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 export default function Request() {
   const [online, setOnline] = useState(true);
+  const [showMedal, setShowMedal] = useState(false);
+  const [showUserMedal, setShowUserMedal] = useState(false);
   const router = useRouter();
   return (
     <View style={styles.safeArea}>
@@ -22,13 +27,18 @@ export default function Request() {
             </View>
             <TouchableOpacity
               style={styles.topButton}
-              onPress={() => console.log("hello World")}
+              onPress={() => setShowUserMedal(true)}
             >
               <MaterialIcons name="settings" size={25} color="black" />
             </TouchableOpacity>
           </View>
         </View>
+        <View style={styles.container}>
+          <RequestCard onPress={() => setShowMedal(!showMedal)} />
+        </View>
       </View>
+      <RequestMedal show={showMedal} setShow={setShowMedal} />
+      <UserMedal show={showUserMedal} setShow={setShowUserMedal} />
     </View>
   );
 }
@@ -66,6 +76,8 @@ const styles = StyleSheet.create({
   toggleOnline: {
     alignItems: "center",
     justifyContent: "center",
-    flex: 1,
+  },
+  container: {
+    padding: 15,
   },
 });

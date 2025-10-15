@@ -21,7 +21,7 @@ export default function Switch({ state = true, toggleState }) {
 
   const translateX = translateAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 100],
+    outputRange: [3, 100],
   });
 
   return (
@@ -58,7 +58,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    marginHorizontal: 3,
   },
   text: {
     color: "#fff",
