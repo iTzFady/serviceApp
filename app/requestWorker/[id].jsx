@@ -4,12 +4,8 @@ import InputField from "@/components/InputField";
 import Separator from "@/components/Separator";
 import UploadButton from "@/components/UploadImageButton";
 import { Speciality } from "@/data/speciality";
-import {
-  Cairo_300Light,
-  Cairo_400Regular,
-  Cairo_500Medium,
-  useFonts,
-} from "@expo-google-fonts/cairo";
+import { fonts } from "@/theme/fonts";
+
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -33,11 +29,7 @@ const profilePic = require("@/assets/images/default-profile.png");
 export default function RequestWorker() {
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
-  const [loaded, error] = useFonts({
-    Cairo_300Light,
-    Cairo_400Regular,
-    Cairo_500Medium,
-  });
+
   const {
     control,
     handleSubmit,
@@ -61,9 +53,6 @@ export default function RequestWorker() {
   const onSubmit = (data) => {
     console.log("Form submitted:", data);
   };
-  if (!loaded && !error) {
-    return null;
-  }
   return (
     <View style={styles.safeArea}>
       <View style={styles.topStyle}>
@@ -144,7 +133,7 @@ export default function RequestWorker() {
                     placeholder="مثلاً: “عندي فيشه مش شغاله”"
                     onChangeText={onChange}
                     value={value}
-                    textStyle={{ fontFamily: "Cairo_300Light", fontSize: 15 }}
+                    textStyle={{ fontFamily: fonts.light, fontSize: 15 }}
                     labelStyle={{ fontSize: 15 }}
                   />
                 )}
@@ -166,7 +155,7 @@ export default function RequestWorker() {
                     placeholder="مثلاً: “حصل قفله كبيره ومن ساعتها فيها ريحه "
                     onChangeText={onChange}
                     value={value}
-                    textStyle={{ fontFamily: "Cairo_300Light", fontSize: 15 }}
+                    textStyle={{ fontFamily: fonts.light, fontSize: 15 }}
                     labelStyle={{ fontSize: 15 }}
                   />
                 )}
@@ -188,7 +177,7 @@ export default function RequestWorker() {
                     placeholder="اكتب عنوانك بالتفصيل"
                     onChangeText={onChange}
                     value={value}
-                    textStyle={{ fontFamily: "Cairo_300Light", fontSize: 15 }}
+                    textStyle={{ fontFamily: fonts.light, fontSize: 15 }}
                     labelStyle={{ fontSize: 15 }}
                   />
                 )}
@@ -373,7 +362,7 @@ const styles = StyleSheet.create({
   topText: {
     marginRight: 20,
     fontSize: 24,
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
   },
   backButton: {
     position: "absolute",
@@ -409,7 +398,7 @@ const styles = StyleSheet.create({
   workerName: {
     fontSize: 12,
     marginRight: 5,
-    fontFamily: "Cairo_500Medium",
+    fontFamily: fonts.medium,
   },
   ratingContainer: {
     position: "absolute",
@@ -419,7 +408,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     marginHorizontal: 5,
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
     fontSize: 10,
   },
   category: {
@@ -429,7 +418,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   categoryText: {
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
     fontSize: 10,
     marginLeft: 10,
   },
@@ -438,7 +427,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   FieldLabel: {
-    fontFamily: "Cairo_500Medium",
+    fontFamily: fonts.medium,
     fontSize: 15,
     textAlign: "right",
     marginRight: 20,
@@ -458,7 +447,7 @@ const styles = StyleSheet.create({
   },
   dateTimeText: {
     fontSize: 20,
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
   },
   noteContainer: {
     paddingHorizontal: 15,
@@ -469,7 +458,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(0,0,0,0.5)",
     minHeight: 70,
     fontSize: 14,
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
     textAlign: "right",
     padding: 10,
   },

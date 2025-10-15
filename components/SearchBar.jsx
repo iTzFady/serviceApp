@@ -1,4 +1,4 @@
-import { Cairo_300Light, useFonts } from "@expo-google-fonts/cairo";
+import { fonts } from "@/theme/fonts";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useRef, useState } from "react";
 import {
@@ -12,9 +12,7 @@ import {
 export default function SearchBar() {
   const [focused, setFocused] = useState(false);
   const animation = useRef(new Animated.Value(0)).current;
-  const [loaded, error] = useFonts({
-    Cairo_300Light,
-  });
+
   const toggleSearch = (open) => {
     Animated.timing(animation, {
       toValue: open ? 1 : 0,
@@ -38,9 +36,7 @@ export default function SearchBar() {
     inputRange: [0, 0.5, 1],
     outputRange: ["0deg", "90deg", "180deg"],
   });
-  if (!loaded && !error) {
-    return null;
-  }
+
   return (
     <View style={styles.searchContainer}>
       <Animated.View
@@ -90,7 +86,7 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 12,
     color: "rgba(0, 0, 0, 0.71)",
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
     marginLeft: 15,
     paddingVertical: 0,
     textAlign: "right",

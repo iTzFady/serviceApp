@@ -1,4 +1,4 @@
-import { Cairo_500Medium, useFonts } from "@expo-google-fonts/cairo";
+import { fonts } from "@/theme/fonts";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { Shadow } from "react-native-shadow-2";
 export default function InputField({
@@ -12,17 +12,9 @@ export default function InputField({
   icon,
   secureTextEntry,
   value,
-  textStyle = { fontFamily: "Cairo_500Medium", fontSize: 20 },
+  textStyle = { fontFamily: fonts.medium, fontSize: 20 },
   labelStyle = { fontSize: 20 },
 }) {
-  const [loaded, error] = useFonts({
-    Cairo_500Medium,
-  });
-
-  if (!loaded && !error) {
-    return null;
-  }
-
   return (
     <View style={styles.container}>
       <Text style={[styles.TextFieldLabel, labelStyle]}>{text}</Text>
@@ -69,7 +61,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   TextFieldLabel: {
-    fontFamily: "Cairo_500Medium",
+    fontFamily: fonts.medium,
     fontSize: 20,
     width: "100%",
     textAlign: "right",

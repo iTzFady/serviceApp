@@ -3,12 +3,8 @@ import DynamicIcon from "@/components/DynamicIcon";
 import InputField from "@/components/InputField";
 import Separator from "@/components/Separator";
 import WebSelect from "@/components/WebSelect";
-import {
-  Cairo_200ExtraLight,
-  Cairo_300Light,
-  Cairo_500Medium,
-  useFonts,
-} from "@expo-google-fonts/cairo";
+import { fonts } from "@/theme/fonts";
+
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -32,11 +28,7 @@ const logo = require("../assets/images/logo.png");
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(true);
   const [role, setRole] = useState("Client");
-  const [loaded, error] = useFonts({
-    Cairo_200ExtraLight,
-    Cairo_300Light,
-    Cairo_500Medium,
-  });
+
   const {
     control,
     handleSubmit,
@@ -182,10 +174,6 @@ export default function RegisterPage() {
   useEffect(() => {
     setValue("Role", role);
   }, [role, setValue]);
-
-  if (!loaded && !error) {
-    return null;
-  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -424,12 +412,12 @@ const styles = StyleSheet.create({
   optionText: {
     color: "rgba(0,0,0,1)",
     fontSize: 24,
-    fontFamily: "Cairo_200ExtraLight",
+    fontFamily: fonts.extraLight,
   },
   title: {
     color: "rgba(0,0,0,1)",
     fontSize: 20,
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
     textAlign: "center",
   },
   formContainer: {
@@ -450,7 +438,7 @@ const styles = StyleSheet.create({
     marginBlock: "25",
   },
   dropdownLabel: {
-    fontFamily: "Cairo_500Medium",
+    fontFamily: fonts.medium,
     fontSize: 20,
     width: "100%",
     textAlign: "right",
@@ -467,14 +455,14 @@ const styles = StyleSheet.create({
     color: "#000",
     textAlign: "right",
     fontSize: 20,
-    fontFamily: "Cairo_200ExtraLight",
+    fontFamily: fonts.extraLight,
   },
   dropdownPlaceholder: {
     color: "#999",
     textAlign: "right",
     marginRight: 8,
     fontSize: 20,
-    fontFamily: "Cairo_200ExtraLight",
+    fontFamily: fonts.extraLight,
   },
   dropdownItemContainer: {
     flexDirection: "row-reverse",
@@ -486,7 +474,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
     fontSize: 20,
     marginRight: 15,
-    fontFamily: "Cairo_200ExtraLight",
+    fontFamily: fonts.extraLight,
   },
   dropdownItemIcon: {
     padding: 10,
@@ -495,6 +483,6 @@ const styles = StyleSheet.create({
     color: "red",
     marginBottom: 10,
     marginLeft: 20,
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
   },
 });

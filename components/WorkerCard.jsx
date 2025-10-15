@@ -1,14 +1,9 @@
-import {
-  Cairo_300Light,
-  Cairo_500Medium,
-  useFonts,
-} from "@expo-google-fonts/cairo";
-import { Speciality } from "../data/speciality";
-
+import { fonts } from "@/theme/fonts";
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { memo } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
+import { Speciality } from "../data/speciality";
 import Avaliablity from "./avaliablilty";
 import Button from "./Button";
 import DynamicIcon from "./DynamicIcon";
@@ -23,13 +18,7 @@ function WorkerCard({
   onPress,
 }) {
   const work = Speciality.find((w) => w.value === speciality);
-  const [loaded, error] = useFonts({
-    Cairo_500Medium,
-    Cairo_300Light,
-  });
-  if (!loaded && !error) {
-    return null;
-  }
+
   return (
     <View style={styles.cardContainer}>
       <View style={styles.workerDataContainer}>
@@ -134,7 +123,7 @@ const styles = StyleSheet.create({
   workerName: {
     fontSize: 12,
     marginRight: 5,
-    fontFamily: "Cairo_500Medium",
+    fontFamily: fonts.medium,
   },
   ratingContainer: {
     marginRight: 15,
@@ -143,7 +132,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     marginRight: 10,
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
     fontSize: 10,
   },
   availability: {
@@ -161,7 +150,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   categoryText: {
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
     fontSize: 10,
     marginLeft: 5,
   },

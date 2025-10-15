@@ -1,10 +1,6 @@
 import Button from "@/components/Button";
 import InputField from "@/components/InputField";
-import {
-  Cairo_300Light,
-  Cairo_700Bold,
-  useFonts,
-} from "@expo-google-fonts/cairo";
+import { fonts } from "@/theme/fonts";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Link } from "expo-router";
@@ -22,10 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const logo = require("../assets/images/logo.png");
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(true);
-  const [loaded, error] = useFonts({
-    Cairo_700Bold,
-    Cairo_300Light,
-  });
+
   const {
     control,
     handleSubmit,
@@ -39,9 +32,7 @@ export default function LoginPage() {
   const onSubmit = (data) => {
     console.log(data);
   };
-  if (!loaded && !error) {
-    return null;
-  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -158,7 +149,7 @@ const styles = StyleSheet.create({
   },
   forgetPasswordLink: {
     color: "#214503",
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
     fontSize: 12,
     marginRight: 30,
     textAlign: "right",

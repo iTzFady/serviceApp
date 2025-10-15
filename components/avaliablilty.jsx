@@ -1,13 +1,8 @@
-import { Cairo_700Bold, useFonts } from "@expo-google-fonts/cairo";
+import { fonts } from "@/theme/fonts";
 import Feather from "@expo/vector-icons/Feather";
 import { StyleSheet, Text, View } from "react-native";
+
 export default function Avaliablity({ isAvaliable, style }) {
-  const [loaded, error] = useFonts({
-    Cairo_700Bold,
-  });
-  if (!loaded && !error) {
-    return null;
-  }
   return (
     <View
       style={[
@@ -36,7 +31,7 @@ const styles = StyleSheet.create({
   text: {
     color: "#fff",
     fontSize: 10,
-    fontFamily: "Cairo_700Bold",
+    fontFamily: fonts.bold,
     marginLeft: 5,
   },
 });

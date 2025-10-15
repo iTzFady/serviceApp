@@ -2,12 +2,7 @@ import SearchBar from "@/components/SearchBar";
 import SpecialityChip from "@/components/specialityChip.jsx";
 import WebSelect from "@/components/WebSelect";
 import WorkerCard from "@/components/WorkerCard";
-import {
-  Cairo_200ExtraLight,
-  Cairo_300Light,
-  Cairo_600SemiBold,
-  useFonts,
-} from "@expo-google-fonts/cairo";
+import { fonts } from "@/theme/fonts";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
@@ -34,11 +29,7 @@ const name = "فادي سامي";
 export default function Index() {
   const [selectedChip, setSelectedChip] = useState(null);
   const [currentRegion, setCurrentRegion] = useState(null);
-  const [loaded, error] = useFonts({
-    Cairo_300Light,
-    Cairo_200ExtraLight,
-    Cairo_600SemiBold,
-  });
+
   const router = useRouter();
   const keyExtractor = useCallback((item) => item.Id.toString(), []);
   const handlePress = useCallback(
@@ -74,14 +65,15 @@ export default function Index() {
     },
     [handlePress]
   );
-  if (!loaded && !error) {
-    return null;
-  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.topStyle}>
         <Image style={styles.logo} source={logo} />
-        <TouchableOpacity style={styles.settingsButton} onPress={() => {}}>
+        <TouchableOpacity
+          style={styles.settingsButton}
+          onPress={() => router.push(`/requests/[workerId].jsx`)}
+        >
           <FontAwesome name="sliders" size={24} color="rgba(51, 109, 3, 1)" />
         </TouchableOpacity>
       </View>
@@ -209,7 +201,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   welcomeText: {
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
     fontSize: 12,
     marginBottom: 5,
   },
@@ -233,7 +225,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
   },
   requestButtonText: {
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
     fontSize: 12,
     marginRight: 10,
   },
@@ -251,14 +243,14 @@ const styles = StyleSheet.create({
     textAlign: "left",
     width: "50%",
     fontSize: 12,
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
     color: "rgba(34, 71, 3, 1)",
   },
   categoryRightText: {
     textAlign: "right",
     width: "50%",
     fontSize: 15,
-    fontFamily: "Cairo_600SemiBold",
+    fontFamily: fonts.semiBold,
     color: "rgba(34, 71, 3, 1)",
   },
   categoryTabs: {
@@ -286,14 +278,14 @@ const styles = StyleSheet.create({
     color: "#000",
     textAlign: "right",
     fontSize: 12,
-    fontFamily: "Cairo_200ExtraLight",
+    fontFamily: fonts.extraLight,
   },
   dropdownPlaceholder: {
     color: "black",
     textAlign: "right",
     marginRight: 8,
     fontSize: 12,
-    fontFamily: "Cairo_200ExtraLight",
+    fontFamily: fonts.extraLight,
   },
   dropdownItemContainer: {
     flexDirection: "row-reverse",
@@ -305,7 +297,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
     fontSize: 20,
     marginRight: 15,
-    fontFamily: "Cairo_200ExtraLight",
+    fontFamily: fonts.extraLight,
   },
   workerCardContainer: {
     width: "100%",

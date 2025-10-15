@@ -1,10 +1,6 @@
 import Button from "@/components/Button";
 import Separator from "@/components/Separator";
-import {
-  Cairo_600SemiBold,
-  Cairo_700Bold,
-  useFonts,
-} from "@expo-google-fonts/cairo";
+import { fonts } from "@/theme/fonts";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
@@ -24,16 +20,9 @@ const logo = require("../assets/images/logo.png");
 const { width, height } = Dimensions.get("window");
 
 export default function IntroScree() {
-  const [loaded, error] = useFonts({
-    Cairo_700Bold,
-    Cairo_600SemiBold,
-  });
   const router = useRouter();
   const [index, setIndex] = useState(0);
   const sliderRef = useRef(null);
-  if (!loaded && !error) {
-    return null;
-  }
   const createSlider = ({ item }) => {
     return (
       <View style={[styles.slide, { backgroundColor: item.backgroundColor }]}>
@@ -175,13 +164,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: width * 0.07,
     color: "#000000",
-    fontFamily: "Cairo_700Bold",
+    fontFamily: fonts.bold,
     textAlign: "center",
   },
   text: {
     fontSize: width * 0.04,
     color: "#000000",
-    fontFamily: "Cairo_600SemiBold",
+    fontFamily: fonts.semiBold,
     textAlign: "center",
   },
   image: {

@@ -1,3 +1,4 @@
+import { fonts } from "@/theme/fonts";
 import * as ImagePicker from "expo-image-picker";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -44,6 +45,6 @@ const styles = StyleSheet.create({
   },
   uploadButtonText: {
     fontSize: 20,
-    fontFamily: "Cairo_400Regular",
+    fontFamily: fonts.regular,
   },
 });

@@ -1,9 +1,6 @@
-import {
-  Cairo_200ExtraLight,
-  Cairo_500Medium,
-  useFonts,
-} from "@expo-google-fonts/cairo";
+import { fonts } from "@/theme/fonts";
 import { StyleSheet, Text, View } from "react-native";
+
 export default function WebSelect({
   data,
   value,
@@ -11,13 +8,6 @@ export default function WebSelect({
   label,
   placeHolder,
 }) {
-  const [loaded, error] = useFonts({
-    Cairo_200ExtraLight,
-    Cairo_500Medium,
-  });
-  if (!loaded && !error) {
-    return null;
-  }
   return (
     <View style={styles.containter}>
       {label && <Text style={styles.label}>{label}</Text>}
@@ -51,7 +41,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
     fontSize: 12,
     marginBottom: 5,
-    fontFamily: "Cairo_500Medium",
+    fontFamily: fonts.medium,
   },
   select: {
     width: "100%",
@@ -59,7 +49,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     paddingHorizontal: 10,
     borderRadius: 5,
-    fontFamily: "Cairo_200ExtraLight",
+    fontFamily: fonts.extraLight,
     textAlign: "right",
     writingDirection: "rtl",
   },

@@ -1,4 +1,4 @@
-import { Cairo_700Bold, useFonts } from "@expo-google-fonts/cairo";
+import { fonts } from "@/theme/fonts";
 import { Pressable, Text } from "react-native";
 import { Shadow } from "react-native-shadow-2";
 export default function Button({
@@ -12,12 +12,6 @@ export default function Button({
   borderRadius = 10,
   style,
 }) {
-  const [loaded, error] = useFonts({
-    Cairo_700Bold,
-  });
-  if (!loaded && !error) {
-    return null;
-  }
   return (
     <Shadow
       style={{ width: "100%" }}
@@ -42,7 +36,7 @@ export default function Button({
           style={{
             color: color,
             fontSize: fontSize,
-            fontFamily: "Cairo_700Bold",
+            fontFamily: fonts.bold,
             textAlign: "center",
           }}
         >

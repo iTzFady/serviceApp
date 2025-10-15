@@ -1,10 +1,8 @@
 import DynamicIcon from "@/components/DynamicIcon";
-import {
-  Cairo_300Light,
-  Cairo_700Bold,
-  useFonts,
-} from "@expo-google-fonts/cairo";
+
+import { fonts } from "@/theme/fonts";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+
 export default function SpecialityChip({
   text,
   iconPath,
@@ -12,23 +10,13 @@ export default function SpecialityChip({
   selected,
   onPressEvent,
 }) {
-  const [loaded, error] = useFonts({
-    Cairo_700Bold,
-    Cairo_300Light,
-  });
-  if (!loaded && !error) {
-    return null;
-  }
   return (
     <Pressable
       style={[styles.container, selected ? styles.selected : null]}
       onPress={onPressEvent}
     >
       <Text
-        style={[
-          styles.textStyle,
-          selected ? { fontFamily: "Cairo_700Bold" } : null,
-        ]}
+        style={[styles.textStyle, selected ? { fontFamily: fonts.bold } : null]}
       >
         {text}
       </Text>
@@ -49,7 +37,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   textStyle: {
-    fontFamily: "Cairo_300Light",
+    fontFamily: fonts.light,
     fontSize: 12,
   },
   selected: {
