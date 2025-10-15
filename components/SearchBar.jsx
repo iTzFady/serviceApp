@@ -1,6 +1,6 @@
 import { fonts } from "@/theme/fonts";
 import { MaterialIcons } from "@expo/vector-icons";
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Animated,
   Easing,
@@ -11,6 +11,10 @@ import {
 } from "react-native";
 export default function SearchBar() {
   const [focused, setFocused] = useState(false);
+  const [searchBarLayout, setSearchBarLayout] = useState({
+    width: 0,
+    height: 0,
+  });
   const animation = useRef(new Animated.Value(0)).current;
 
   const toggleSearch = (open) => {
@@ -25,7 +29,7 @@ export default function SearchBar() {
 
   const iconTranslate = animation.interpolate({
     inputRange: [0, 1],
-    outputRange: [-10, -150],
+    outputRange: [-10, -searchBarLayout.width + 25],
   });
 
   const inputOpacity = animation.interpolate({
@@ -38,7 +42,13 @@ export default function SearchBar() {
   });
 
   return (
-    <View style={styles.searchContainer}>
+    <View
+      style={styles.searchContainer}
+      onLayout={(e) => {
+        const { width, height } = e.nativeEvent.layout;
+        setSearchBarLayout({ width, height });
+      }}
+    >
       <Animated.View
         style={{
           transform: [{ translateX: iconTranslate }, { rotateY: iconFlip }],

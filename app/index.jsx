@@ -6,7 +6,7 @@ import { fonts } from "@/theme/fonts";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   Image,
@@ -29,7 +29,7 @@ const name = "فادي سامي";
 export default function Index() {
   const [selectedChip, setSelectedChip] = useState(null);
   const [currentRegion, setCurrentRegion] = useState(null);
-
+  const [filterdWorkers, setFilteredWorkers] = useState(Workers);
   const router = useRouter();
   const keyExtractor = useCallback((item) => item.Id.toString(), []);
   const handlePress = useCallback(
@@ -41,6 +41,18 @@ export default function Index() {
     },
     [router]
   );
+  const applyFilter = useCallback(() => {
+    let filtered = Workers;
+    if (selectedChip) {
+      filtered = filtered.filter(
+        (worker) => worker.WorkerSpecialty === selectedChip
+      );
+    }
+    if (currentRegion) {
+      filtered = filtered.filter((worker) => worker.region === currentRegion);
+    }
+    setFilteredWorkers(filtered);
+  }, [currentRegion, selectedChip]);
   const renderItem = useCallback(
     ({ item }) => {
       return (
@@ -65,7 +77,9 @@ export default function Index() {
     },
     [handlePress]
   );
-
+  useEffect(() => {
+    applyFilter();
+  }, [applyFilter]);
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.topStyle}>
@@ -94,7 +108,12 @@ export default function Index() {
         <View style={styles.workerCategory}>
           <View style={styles.category}>
             <Text style={styles.categoryRightText}>اختر التخصص</Text>
-            <Text style={styles.categoryLeftText}>كل التخصصات</Text>
+            <TouchableOpacity
+              style={{ width: "50%" }}
+              onPress={() => setSelectedChip(null)}
+            >
+              <Text style={styles.categoryLeftText}>كل التخصصات</Text>
+            </TouchableOpacity>
           </View>
           <ScrollView
             style={styles.categoryTabs}
@@ -139,7 +158,7 @@ export default function Index() {
               labelField="label"
               valueField="value"
               placeholder="اختر منطقتك"
-              onChange={(item) => setCurrentRegion(item)}
+              onChange={(item) => setCurrentRegion(item.value)}
               activeColor="#e0f7fa"
             />
           </View>
@@ -155,7 +174,7 @@ export default function Index() {
               <FlatList
                 style={styles.workerCardContainer}
                 renderItem={renderItem}
-                data={Workers}
+                data={filterdWorkers}
                 scrollEnabled={false}
                 showsVerticalScrollIndicator={true}
               />
@@ -166,7 +185,7 @@ export default function Index() {
               itemLayoutAnimation={LinearTransition}
               style={styles.workerCardContainer}
               renderItem={renderItem}
-              data={Workers}
+              data={filterdWorkers}
               showsVerticalScrollIndicator={false}
               initialNumToRender={8}
               windowSize={5}
@@ -241,8 +260,8 @@ const styles = StyleSheet.create({
   },
   categoryLeftText: {
     textAlign: "left",
-    width: "50%",
     fontSize: 12,
+    width: "50%",
     fontFamily: fonts.light,
     color: "rgba(34, 71, 3, 1)",
   },
