@@ -2,8 +2,9 @@ import Button from "@/components/Button";
 import Separator from "@/components/Separator";
 import { fonts } from "@/theme/fonts";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -19,10 +20,49 @@ import { slides } from "../data/slides";
 const logo = require("../assets/images/logo.png");
 const { width, height } = Dimensions.get("window");
 
-export default function IntroScree() {
+export default function IntroScreen() {
   const router = useRouter();
   const [index, setIndex] = useState(0);
+  const [showApp, setShowApp] = useState(false);
+  const [loading, setLoading] = useState(true);
   const sliderRef = useRef(null);
+  useEffect(() => {
+    const checkIntro = async () => {
+      const hasSeenIntro = await AsyncStorage.getItem("hasSeenIntro");
+      if (hasSeenIntro) {
+        setShowApp(true);
+      }
+      setLoading(false);
+    };
+    checkIntro();
+  }, []);
+  useEffect(() => {
+    if (showApp) {
+      router.replace("/login");
+    }
+  }, [showApp, router]);
+
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#Bde3e4",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Image
+          source={require("@/assets/images/logo.png")}
+          style={{ width: 150, height: 150 }}
+        />
+      </View>
+    );
+  }
+  const finishIntro = async (route) => {
+    await AsyncStorage.setItem("hasSeenIntro", "true");
+    router.replace(route);
+  };
   const createSlider = ({ item }) => {
     return (
       <View style={[styles.slide, { backgroundColor: item.backgroundColor }]}>
@@ -53,7 +93,7 @@ export default function IntroScree() {
               fontSize={24}
               height={45}
               onPressEvent={() => {
-                router.replace("/register");
+                finishIntro("/register");
               }}
             />
             <Button
@@ -63,7 +103,7 @@ export default function IntroScree() {
               fontSize={24}
               height={45}
               onPressEvent={() => {
-                router.replace("/login");
+                finishIntro("/login");
               }}
             />
           </View>
