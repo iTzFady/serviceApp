@@ -1,14 +1,20 @@
+import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import InputField from "@/components/InputField";
+import { ThemeContext } from "@/context/ThemeContext";
+import { useUser } from "@/context/UserContext";
 import { fonts } from "@/theme/fonts";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { Link } from "expo-router";
-import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { Link, useRouter } from "expo-router";
+import { useContext, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Image,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -16,21 +22,55 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 const logo = require("../assets/images/logo.png");
-export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(true);
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
+export default function LoginPage() {
+  const router = useRouter();
+  const { updateUser } = useUser();
+  const [showPassword, setShowPassword] = useState(true);
+  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm({
     defaultValues: {
-      email: "",
-      password: "",
+      Email: "",
+      Password: "",
     },
   });
-  const onSubmit = (data) => {
-    console.log(data);
+  const onSubmit = async (data) => {
+    await axios({
+      method: "post",
+      url: `${apiUrl}/user/login`,
+      data: data,
+    })
+      .then((res) => {
+        try {
+          if (res.data.token && res.data.code === "LOGIN_SUCCESSFUL") {
+            AsyncStorage.setItem("userToken", res.data.token);
+            updateUser(res.data.user);
+            router.replace("/");
+          }
+        } catch (err) {
+          Alert("Error", err);
+        }
+      })
+      .catch((err) => {
+        if (err.response && err.response.data) {
+          Alert(
+            "Error",
+            err.response.data?.message || JSON.stringify(err.response.data)
+          );
+        } else if (err.request) {
+          Alert(
+            "Network Error",
+            "Unable to reach the server. Please check your connection."
+          );
+        } else {
+          Alert("Error", "Something went wrong. Please try again later.");
+        }
+      });
   };
 
   return (
@@ -40,7 +80,7 @@ export default function LoginPage() {
           <Image source={logo} style={styles.logo} />
           <Controller
             control={control}
-            name="email"
+            name="Email"
             rules={{
               required: "E-mail is required",
               pattern: { value: /\S+@\S+\.\S+/, message: "Invalid email" },
@@ -59,12 +99,12 @@ export default function LoginPage() {
               />
             )}
           />
-          {errors.email && (
-            <Text style={styles.error}>{errors.email.message}</Text>
+          {errors.Email && (
+            <Text style={styles.error}>{errors.Email.message}</Text>
           )}
           <Controller
             control={control}
-            name="password"
+            name="Password"
             rules={{ required: "Password is required", minLength: 6 }}
             render={({ field: { onChange, value } }) => (
               <InputField
@@ -95,14 +135,15 @@ export default function LoginPage() {
             style={{
               flexDirection: "row-reverse",
               width: "100%",
-              marginHorizontal: "auto",
             }}
           >
             <Link style={styles.forgetPasswordLink} href="/">
               هل نسيت كلمة السر؟
             </Link>
-            {errors.password && (
-              <Text style={styles.error}>{errors.password.message}</Text>
+            {errors.Password && (
+              <Text style={[styles.error, { marginRight: 10 }]}>
+                {errors.Password.message}
+              </Text>
             )}
           </View>
           <View style={styles.buttonContainer}>
@@ -128,6 +169,7 @@ export default function LoginPage() {
           </View>
         </ScrollView>
       </View>
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </SafeAreaView>
   );
 }
@@ -151,7 +193,7 @@ const styles = StyleSheet.create({
     color: "#214503",
     fontFamily: fonts.light,
     fontSize: 12,
-    marginRight: 30,
+    marginRight: 18,
     textAlign: "right",
     width: "50%",
   },

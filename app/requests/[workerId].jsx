@@ -2,14 +2,16 @@ import RequestCard from "@/components/RequestCard";
 import RequestMedal from "@/components/RequestModal";
 import Switch from "@/components/Switch";
 import UserMedal from "@/components/UserMedal";
+import { ThemeContext } from "@/context/ThemeContext";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { useContext, useState } from "react";
+import { StatusBar, StyleSheet, TouchableOpacity, View } from "react-native";
 export default function Request() {
   const [online, setOnline] = useState(true);
   const [showMedal, setShowMedal] = useState(false);
   const [showUserMedal, setShowUserMedal] = useState(false);
+  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   const router = useRouter();
   return (
     <View style={styles.safeArea}>
@@ -39,6 +41,7 @@ export default function Request() {
       </View>
       <RequestMedal show={showMedal} setShow={setShowMedal} />
       <UserMedal show={showUserMedal} setShow={setShowUserMedal} />
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </View>
   );
 }

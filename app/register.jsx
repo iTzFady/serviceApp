@@ -1,12 +1,15 @@
+import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import DynamicIcon from "@/components/DynamicIcon";
 import InputField from "@/components/InputField";
 import Separator from "@/components/Separator";
 import WebSelect from "@/components/WebSelect";
+import { ThemeContext } from "@/context/ThemeContext";
 import { fonts } from "@/theme/fonts";
-
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { useEffect, useState } from "react";
+import axios from "axios";
+import { useRouter } from "expo-router";
+import { useContext, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Image,
@@ -14,6 +17,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -25,10 +29,13 @@ import { Shadow } from "react-native-shadow-2";
 import { Regions } from "../data/regions";
 import { Speciality } from "../data/speciality";
 const logo = require("../assets/images/logo.png");
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(true);
+  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   const [role, setRole] = useState("Client");
-
+  const router = useRouter();
   const {
     control,
     handleSubmit,
@@ -43,14 +50,54 @@ export default function RegisterPage() {
       password: "",
       confirmPassword: "",
       Role: role,
-      NationalNumber: "",
-      speciality: "",
-      region: "",
+      NationalNumber: null,
+      speciality: null,
+      region: null,
     },
   });
-  const onSubmit = (data) => {
-    const payload = { ...data, role: role };
-    console.log(payload);
+  const onSubmit = async (data) => {
+    const payload = { ...data, Role: role };
+    if (payload.password !== payload.confirmPassword) {
+      Alert(
+        "Password Mismatch",
+        "Please ensure that both password fields match before continuing."
+      );
+    }
+    await axios({
+      method: "post",
+      url: `${apiUrl}/user/register`,
+      data: {
+        Name: payload.name,
+        Role: payload.Role,
+        Email: payload.email,
+        Password: payload.password,
+        PhoneNumber: payload.phoneNumber,
+        NationalNumber: payload.NationalNumber ? payload.NationalNumber : null,
+        Region: payload.region ? payload.region : null,
+        WorkerSpecialty: payload.speciality ? payload.speciality : null,
+      },
+    })
+      .then((res) => {
+        if (res.data.code === "REGISTRATION_SUCCESSFUL") {
+          Alert("Message", res.data.message);
+          router.replace("/login");
+        }
+      })
+      .catch((err) => {
+        if (err.response && err.response.data) {
+          Alert(
+            "Error",
+            err.response.data?.message || JSON.stringify(err.response.data)
+          );
+        } else if (err.request) {
+          Alert(
+            "Network Error",
+            "Unable to reach the server. Please check your connection."
+          );
+        } else {
+          Alert("Error", "Something went wrong. Please try again later.");
+        }
+      });
   };
   const renderDropdownItems = (item) => {
     return (
@@ -94,6 +141,7 @@ export default function RegisterPage() {
         )}
         <Controller
           control={control}
+          rules={{ required: "You must choose a speciality" }}
           name="speciality"
           render={({ field: { onChange, value } }) =>
             Platform.OS === "web" ? (
@@ -132,6 +180,7 @@ export default function RegisterPage() {
         )}
         <Controller
           control={control}
+          rules={{ required: "You must choose a Region" }}
           name="region"
           render={({ field: { onChange, value } }) =>
             Platform.OS === "web" ? (
@@ -177,7 +226,7 @@ export default function RegisterPage() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Image style={styles.logo} source={logo} />
+      <Image style={styles.logo} source={logo} resizeMode="contain" />
 
       <View style={styles.optionContainer}>
         <Shadow
@@ -379,6 +428,7 @@ export default function RegisterPage() {
           />
         </View>
       </KeyboardAvoidingView>
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </SafeAreaView>
   );
 }
@@ -391,7 +441,6 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 110,
-    resizeMode: "contain",
   },
   optionContainer: {
     flexDirection: "row-reverse",

@@ -3,6 +3,7 @@ import DynamicIcon from "@/components/DynamicIcon";
 import InputField from "@/components/InputField";
 import Separator from "@/components/Separator";
 import UploadButton from "@/components/UploadImageButton";
+import { ThemeContext } from "@/context/ThemeContext";
 import { Speciality } from "@/data/speciality";
 import { fonts } from "@/theme/fonts";
 
@@ -10,7 +11,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Image,
@@ -18,6 +19,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -29,7 +31,7 @@ const profilePic = require("@/assets/images/default-profile.png");
 export default function RequestWorker() {
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
-
+  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   const {
     control,
     handleSubmit,
@@ -337,6 +339,7 @@ export default function RequestWorker() {
           </View>
         </KeyboardAvoidingView>
       </View>
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </View>
   );
 }

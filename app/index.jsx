@@ -1,18 +1,25 @@
+import Alert from "@/components/Alert";
 import SearchBar from "@/components/SearchBar";
 import SpecialityChip from "@/components/specialityChip.jsx";
 import WebSelect from "@/components/WebSelect";
 import WorkerCard from "@/components/WorkerCard";
+import { ThemeContext } from "@/context/ThemeContext";
+import { useUser } from "@/context/UserContext";
 import { fonts } from "@/theme/fonts";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import axios from "axios";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import {
   FlatList,
   Image,
   Platform,
   Pressable,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -24,13 +31,57 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Regions } from "../data/regions";
 import { Speciality } from "../data/speciality";
 import { Workers } from "../data/workers";
+
 const logo = require("../assets/images/logo.png");
-const name = "فادي سامي";
 export default function Index() {
+  const { user } = useUser();
   const [selectedChip, setSelectedChip] = useState(null);
   const [currentRegion, setCurrentRegion] = useState(null);
   const [filterdWorkers, setFilteredWorkers] = useState(Workers);
+  const [currentUser, setCurrentUser] = useState(user?.name);
+  const [token, setToken] = useState(null);
+  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
   const router = useRouter();
+  useEffect(() => {
+    const checkToken = async () => {
+      const storedToken = await AsyncStorage.getItem("userToken");
+      if (!storedToken) {
+        router.replace("/login");
+      } else {
+        setToken(storedToken.trim());
+      }
+    };
+    checkToken();
+  }, [token, router]);
+  useEffect(() => {
+    if (token !== null) {
+      axios({
+        method: "get",
+        url: `${apiUrl}/user/me`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }).catch((err) => {
+        if (err.response && err.response.data) {
+          Alert(
+            "Error",
+            err.response.data?.message || JSON.stringify(err.response.data)
+          );
+          AsyncStorage.removeItem("userToken");
+        } else if (err.request) {
+          Alert(
+            "Network Error",
+            "Unable to reach the server. Please check your connection."
+          );
+        } else {
+          Alert("Error", "Something went wrong. Please try again later.");
+          AsyncStorage.removeItem("userToken");
+        }
+      });
+    }
+  }, [token, apiUrl]);
+
   const keyExtractor = useCallback((item) => item.Id.toString(), []);
   const handlePress = useCallback(
     (id, name, job, rating) => {
@@ -83,7 +134,7 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.topStyle}>
-        <Image style={styles.logo} source={logo} />
+        <Image style={styles.logo} source={logo} resizeMode="contain" />
         <TouchableOpacity
           style={styles.settingsButton}
           onPress={() => router.push(`/requests/[workerId].jsx`)}
@@ -92,7 +143,7 @@ export default function Index() {
         </TouchableOpacity>
       </View>
       <View style={styles.container}>
-        <Text style={styles.welcomeText}>مرحبا، {name}</Text>
+        <Text style={styles.welcomeText}>مرحبا، {currentUser}</Text>
         <View style={styles.topBar}>
           <SearchBar />
           <Pressable style={styles.requestButton}>
@@ -194,6 +245,7 @@ export default function Index() {
           )}
         </View>
       </View>
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </SafeAreaView>
   );
 }
@@ -209,7 +261,6 @@ const styles = StyleSheet.create({
   logo: {
     width: 110,
     marginHorizontal: "auto",
-    resizeMode: "contain",
   },
   settingsButton: {
     position: "absolute",

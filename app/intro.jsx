@@ -1,14 +1,16 @@
 import Button from "@/components/Button";
 import Separator from "@/components/Separator";
+import { ThemeContext } from "@/context/ThemeContext";
 import { fonts } from "@/theme/fonts";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -17,6 +19,7 @@ import {
 import AppIntroSlider from "react-native-app-intro-slider";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { slides } from "../data/slides";
+
 const logo = require("../assets/images/logo.png");
 const { width, height } = Dimensions.get("window");
 
@@ -26,6 +29,7 @@ export default function IntroScreen() {
   const [showApp, setShowApp] = useState(false);
   const [loading, setLoading] = useState(true);
   const sliderRef = useRef(null);
+  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   useEffect(() => {
     const checkIntro = async () => {
       const hasSeenIntro = await AsyncStorage.getItem("hasSeenIntro");
@@ -66,7 +70,7 @@ export default function IntroScreen() {
   const createSlider = ({ item }) => {
     return (
       <View style={[styles.slide, { backgroundColor: item.backgroundColor }]}>
-        <Image style={styles.image} source={item.image} />
+        <Image style={styles.image} source={item.image} resizeMode="contain" />
         <Separator separatorWidth="85%" margin={15} />
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.text}>{item.text}</Text>
@@ -171,6 +175,7 @@ export default function IntroScreen() {
           scrollEnabled={false}
         />
       </ScrollView>
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </SafeAreaView>
   );
 }
@@ -216,7 +221,6 @@ const styles = StyleSheet.create({
   image: {
     width: width * 0.65,
     height: height * 0.4,
-    resizeMode: "contain",
   },
   footer: {
     position: "relative",
