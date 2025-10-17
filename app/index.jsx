@@ -30,14 +30,14 @@ import Animated, { LinearTransition } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Regions } from "../data/regions";
 import { Speciality } from "../data/speciality";
-import { Workers } from "../data/workers";
 
 const logo = require("../assets/images/logo.png");
 export default function Index() {
-  const { user } = useUser();
+  const { user, updateUser } = useUser();
   const [selectedChip, setSelectedChip] = useState(null);
   const [currentRegion, setCurrentRegion] = useState(null);
-  const [filterdWorkers, setFilteredWorkers] = useState(Workers);
+  const [workers, setWorkers] = useState([]);
+  const [filterdWorkers, setFilteredWorkers] = useState(workers);
   const [currentUser, setCurrentUser] = useState(user?.name);
   const [token, setToken] = useState(null);
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
@@ -62,26 +62,59 @@ export default function Index() {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }).catch((err) => {
-        if (err.response && err.response.data) {
-          Alert(
-            "Error",
-            err.response.data?.message || JSON.stringify(err.response.data)
-          );
-          AsyncStorage.removeItem("userToken");
-        } else if (err.request) {
-          Alert(
-            "Network Error",
-            "Unable to reach the server. Please check your connection."
-          );
-        } else {
-          Alert("Error", "Something went wrong. Please try again later.");
-          AsyncStorage.removeItem("userToken");
-        }
-      });
+      })
+        .then((res) => {
+          updateUser(res.data);
+        })
+        .catch((err) => {
+          if (err.response && err.response.data) {
+            Alert(
+              "Error",
+              err.response.data?.message || JSON.stringify(err.response.data)
+            );
+            AsyncStorage.removeItem("userToken");
+          } else if (err.request) {
+            Alert(
+              "Network Error",
+              "Unable to reach the server. Please check your connection."
+            );
+          } else {
+            Alert("Error", "Something went wrong. Please try again later.");
+            AsyncStorage.removeItem("userToken");
+          }
+        });
     }
-  }, [token, apiUrl]);
-
+  }, [token, apiUrl, updateUser]);
+  useEffect(() => {
+    if (token) {
+      axios({
+        method: "get",
+        url: `${apiUrl}/user/workers`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => {
+          setWorkers(res.data);
+        })
+        .catch((err) => {
+          if (err.response && err.response.data) {
+            Alert(
+              "Error",
+              err.response.data?.message || JSON.stringify(err.response.data)
+            );
+          } else if (err.request) {
+            Alert(
+              "Network Error",
+              "Unable to reach the server. Please check your connection."
+            );
+          } else {
+            Alert("Error", "Something went wrong. Please try again later.");
+          }
+        });
+    }
+  }, [apiUrl, token]);
+  console.log(workers);
   const keyExtractor = useCallback((item) => item.Id.toString(), []);
   const handlePress = useCallback(
     (id, name, job, rating) => {
@@ -93,34 +126,34 @@ export default function Index() {
     [router]
   );
   const applyFilter = useCallback(() => {
-    let filtered = Workers;
+    let filtered = workers;
     if (selectedChip) {
       filtered = filtered.filter(
-        (worker) => worker.WorkerSpecialty === selectedChip
+        (worker) => worker.workerSpecialty === selectedChip
       );
     }
     if (currentRegion) {
       filtered = filtered.filter((worker) => worker.region === currentRegion);
     }
     setFilteredWorkers(filtered);
-  }, [currentRegion, selectedChip]);
+  }, [currentRegion, selectedChip, workers]);
   const renderItem = useCallback(
     ({ item }) => {
       return (
         <WorkerCard
-          key={item.Id}
-          id={item.Id}
-          name={item.Name}
-          speciality={item.WorkerSpecialty}
-          availability={item.IsAvailable}
-          rating={item.AverageRating}
+          key={item.id}
+          id={item.id}
+          name={item.name}
+          speciality={item.workerSpecialty}
+          availability={item.isAvailable}
+          rating={item.averageRating}
           region={item.region}
           onPress={() =>
             handlePress(
-              item.Id,
-              item.Name,
-              item.WorkerSpecialty,
-              item.AverageRating
+              item.id,
+              item.name,
+              item.workerSpecialty,
+              item.averageRating
             )
           }
         />

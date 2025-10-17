@@ -1,3 +1,4 @@
+import { Regions } from "@/data/regions";
 import { fonts } from "@/theme/fonts";
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -18,7 +19,7 @@ function WorkerCard({
   onPress,
 }) {
   const work = Speciality.find((w) => w.value === speciality);
-
+  const workerRegion = Regions.find((w) => w.value === region);
   return (
     <View style={styles.cardContainer}>
       <View style={styles.workerDataContainer}>
@@ -55,7 +56,7 @@ function WorkerCard({
       <View style={styles.workerDetails}>
         <Entypo name="location" size={18} color="black" />
         <Text style={[styles.categoryText, { marginRight: 10 }]}>
-          الاسكندرية، {region}
+          الاسكندرية، {workerRegion?.label}
         </Text>
         <View
           style={{
