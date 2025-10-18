@@ -1,18 +1,38 @@
+import Alert from "@/components/Alert";
 import RequestCard from "@/components/RequestCard";
 import RequestMedal from "@/components/RequestModal";
 import Switch from "@/components/Switch";
 import UserMedal from "@/components/UserMedal";
 import { ThemeContext } from "@/context/ThemeContext";
+import { useUser } from "@/context/UserContext";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { useRouter } from "expo-router";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { StatusBar, StyleSheet, TouchableOpacity, View } from "react-native";
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
 export default function Request() {
-  const [online, setOnline] = useState(true);
+  const { user, updateUser } = useUser();
+  const [online, setOnline] = useState(user?.isAvailable);
   const [showMedal, setShowMedal] = useState(false);
   const [showUserMedal, setShowUserMedal] = useState(false);
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
+  const [token, setToken] = useState(null);
   const router = useRouter();
+  useEffect(() => {
+    const checkToken = async () => {
+      const storedToken = await AsyncStorage.getItem("userToken");
+      if (!storedToken) {
+        router.replace("/login");
+      } else {
+        setToken(storedToken.trim());
+      }
+    };
+    checkToken();
+  }, [token, router]);
+
   return (
     <View style={styles.safeArea}>
       <View style={{ backgroundColor: "#Bde3e4" }}>
@@ -25,7 +45,43 @@ export default function Request() {
               <FontAwesome name="sliders" size={25} color="rgba(0,0,0,1" />
             </TouchableOpacity>
             <View style={styles.toggleOnline}>
-              <Switch state={online} toggleState={setOnline} />
+              <Switch
+                state={online}
+                toggleState={(value) => {
+                  console.log(value);
+                  axios({
+                    method: "put",
+                    url: `${apiUrl}/user/availability`,
+                    data: value,
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                      "Content-Type": "application/json",
+                    },
+                  })
+                    .then((res) => {
+                      setOnline(res.data.isAvailable);
+                    })
+                    .catch((err) => {
+                      if (err.response && err.response.data) {
+                        Alert(
+                          "Error",
+                          err.response.data?.message ||
+                            JSON.stringify(err.response.data)
+                        );
+                      } else if (err.request) {
+                        Alert(
+                          "Network Error",
+                          "Unable to reach the server. Please check your connection."
+                        );
+                      } else {
+                        Alert(
+                          "Error",
+                          "Something went wrong. Please try again later."
+                        );
+                      }
+                    });
+                }}
+              />
             </View>
             <TouchableOpacity
               style={styles.topButton}

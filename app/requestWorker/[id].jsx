@@ -4,14 +4,16 @@ import InputField from "@/components/InputField";
 import Separator from "@/components/Separator";
 import UploadButton from "@/components/UploadImageButton";
 import { ThemeContext } from "@/context/ThemeContext";
+import { useUser } from "@/context/UserContext";
 import { Speciality } from "@/data/speciality";
 import { fonts } from "@/theme/fonts";
-
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Image,
@@ -28,9 +30,13 @@ import {
 } from "react-native";
 
 const profilePic = require("@/assets/images/default-profile.png");
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
 export default function RequestWorker() {
+  const { user, updateUser } = useUser();
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
+  const [token, setToken] = useState(null);
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   const {
     control,
@@ -52,8 +58,48 @@ export default function RequestWorker() {
   const { id, name, job, rating } = useLocalSearchParams();
   const work = Speciality.find((w) => w.value === job);
   const router = useRouter();
+  useEffect(() => {
+    const checkToken = async () => {
+      const storedToken = await AsyncStorage.getItem("userToken");
+      if (!storedToken) {
+        router.replace("/login");
+      } else {
+        setToken(storedToken.trim());
+      }
+    };
+    checkToken();
+  }, [token, router]);
   const onSubmit = (data) => {
-    console.log("Form submitted:", data);
+    const formData = new FormData();
+    const dateTime = `${data.date}T${data.time}:00`;
+    formData.append("requestedByUserId", user?.id);
+    formData.append("RequestedForUserId", id);
+    formData.append("title", data.type);
+    formData.append("Description", data.description);
+    formData.append("location", data.address);
+    formData.append("dateTime", dateTime);
+    formData.append("notes", data.notes);
+    formData.append("images", {
+      uri: data.image.uri,
+      type: data.image.type,
+      name: data.image.fileName || "photo.jpg",
+    });
+
+    axios({
+      url: `${apiUrl}/requests`,
+      method: "post",
+      data: formData,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
   return (
     <View style={styles.safeArea}>

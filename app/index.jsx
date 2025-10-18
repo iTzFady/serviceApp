@@ -65,6 +65,9 @@ export default function Index() {
       })
         .then((res) => {
           updateUser(res.data);
+          if (!currentUser && res.data.name) {
+            setCurrentUser(res.data.name);
+          }
         })
         .catch((err) => {
           if (err.response && err.response.data) {
@@ -114,8 +117,7 @@ export default function Index() {
         });
     }
   }, [apiUrl, token]);
-  console.log(workers);
-  const keyExtractor = useCallback((item) => item.Id.toString(), []);
+  const keyExtractor = useCallback((item) => item.id.toString(), []);
   const handlePress = useCallback(
     (id, name, job, rating) => {
       router.push({
@@ -170,7 +172,7 @@ export default function Index() {
         <Image style={styles.logo} source={logo} resizeMode="contain" />
         <TouchableOpacity
           style={styles.settingsButton}
-          onPress={() => router.push(`/requests/[workerId].jsx`)}
+          onPress={() => router.push("/requests")}
         >
           <FontAwesome name="sliders" size={24} color="rgba(51, 109, 3, 1)" />
         </TouchableOpacity>

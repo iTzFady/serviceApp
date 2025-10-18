@@ -54,7 +54,7 @@ export default function RootLayout() {
             <Stack.Screen name="register" />
             <Stack.Screen name="index" />
             <Stack.Screen name="requestWorker/[id]" />
-            <Stack.Screen name="requests/[workerId]" />
+            <Stack.Screen name="requests" />
           </Stack>
         </SafeAreaProvider>
       </ThemeProvider>
