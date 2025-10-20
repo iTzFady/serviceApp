@@ -70,21 +70,24 @@ export default function Request() {
     };
     fetchRequests();
   }, [token, user?.id]);
-  const renderItems = useCallback(({ item }) => {
-    return (
-      <RequestCard
-        key={item.id}
-        name={item.requestedBy.name || "Unknown"}
-        rating={item.requestedBy.rating || 0}
-        request={item.title || "No title"}
-        dateTime={formatTime(item.dateTime)}
-        onPress={() => {
-          setShowMedal(!showMedal);
-          setSelectedRequest(item);
-        }}
-      />
-    );
-  });
+  const renderItems = useCallback(
+    ({ item }) => {
+      return (
+        <RequestCard
+          key={item.id}
+          name={item.requestedBy.name || "Unknown"}
+          rating={item.requestedBy.rating || 0}
+          request={item.title || "No title"}
+          dateTime={formatTime(item.dateTime)}
+          onPress={() => {
+            setShowMedal(!showMedal);
+            setSelectedRequest(item);
+          }}
+        />
+      );
+    },
+    [showMedal]
+  );
   return (
     <View style={styles.safeArea}>
       <View style={{ backgroundColor: "#Bde3e4" }}>

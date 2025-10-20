@@ -4,8 +4,13 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
+import { useEffect, useRef } from "react";
 import {
+  Animated,
+  Dimensions,
   Image,
+  Modal,
+  PanResponder,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -14,125 +19,156 @@ import {
   View,
 } from "react-native";
 
-import Modal from "react-native-modal";
 const profilePic = require("@/assets/images/default-profile.png");
+const { width, height } = Dimensions.get("window");
 
 export default function RequestModal({ show, setShow, userType = "worker" }) {
-  return (
-    <View style={styles.container}>
-      <Modal
-        isVisible={show}
-        onBackdropPress={() => setShow(false)}
-        swipeDirection="right"
-        animationIn="slideInRight"
-        animationOut="slideOutRight"
-        animationInTiming={300}
-        animationOutTiming={300}
-        backdropTransitionInTiming={100}
-        backdropTransitionOutTiming={100}
-        useNativeDriverForBackdrop
-        style={styles.modal}
-      >
-        <View style={styles.modalContent}>
-          <View
-            style={{
-              flexDirection: "row-reverse",
-              marginTop: 35,
-              alignContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Image
-              source={profilePic}
-              style={styles.image}
-              resizeMode="cover"
-            />
-            <View style={styles.profileContainer}>
-              <Text style={styles.nameText}>فادي سامي</Text>
+  const slideAnim = useRef(new Animated.Value(width)).current;
 
-              <View style={styles.ratingContainer}>
-                <Text style={styles.ratingText}>4.8</Text>
+  useEffect(() => {
+    if (show) {
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(slideAnim, {
+        toValue: width,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [show, slideAnim]);
+  const handleClose = () => {
+    Animated.timing(slideAnim, {
+      toValue: width,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setShow(false));
+  };
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gesture) => {
+        return Math.abs(gesture.dx) > Math.abs(gesture.dy) && gesture.dx > 10;
+      },
+      onPanResponderMove: (_, gesture) => {
+        if (gesture.dx > 0) {
+          slideAnim.setValue(gesture.dx);
+        }
+      },
+      onPanResponderRelease: (_, gesture) => {
+        if (gesture.dx > 100) {
+          Animated.timing(slideAnim, {
+            toValue: width,
+            duration: 200,
+            useNativeDriver: true,
+          }).start(() => setShow(false));
+        } else {
+          Animated.spring(slideAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
+  return (
+    <Modal
+      visible={show}
+      transparent
+      animationType="none"
+      statusBarTranslucent
+      onRequestClose={handleClose}
+    >
+      <Pressable style={styles.backdrop} onPress={handleClose} />
+
+      <Animated.View
+        {...panResponder.panHandlers}
+        style={[
+          styles.modalContent,
+          { transform: [{ translateX: slideAnim }] },
+        ]}
+      >
+        <View
+          style={{
+            flexDirection: "row-reverse",
+            marginTop: 35,
+            alignContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Image source={profilePic} style={styles.image} resizeMode="cover" />
+          <View style={styles.profileContainer}>
+            <Text style={styles.nameText}>فادي سامي</Text>
+
+            <View style={styles.ratingContainer}>
+              <Text style={styles.ratingText}>4.8</Text>
+              {Array.from({ length: 5 }).map((_, i) => (
                 <MaterialCommunityIcons
+                  key={i}
                   name="star"
                   size={18}
                   color="rgba(237, 237, 14, 0.81)"
                 />
-                <MaterialCommunityIcons
-                  name="star"
-                  size={18}
-                  color="rgba(237, 237, 14, 0.81)"
-                />
-                <MaterialCommunityIcons
-                  name="star"
-                  size={18}
-                  color="rgba(237, 237, 14, 0.81)"
-                />
-                <MaterialCommunityIcons
-                  name="star"
-                  size={18}
-                  color="rgba(237, 237, 14, 0.81)"
-                />
-                <MaterialCommunityIcons
-                  name="star"
-                  size={18}
-                  color="rgba(237, 237, 14, 0.81)"
-                />
-              </View>
+              ))}
             </View>
-            <TouchableOpacity
-              onPress={() => setShow(false)}
-              style={{ marginRight: 20 }}
-            >
-              <MaterialIcons name="arrow-back-ios" size={20} color="black" />
-            </TouchableOpacity>
           </View>
-          <ScrollView style={styles.buttonsContainer}>
-            <Pressable style={styles.button}>
-              <MaterialCommunityIcons name="bell" size={20} color="black" />
-              <Text style={styles.buttonText}>الاشعارات</Text>
-            </Pressable>
-            <Pressable style={styles.button}>
-              <FontAwesome6 name="user-shield" size={20} color="black" />
-              <Text style={styles.buttonText}>السلامه</Text>
-            </Pressable>
-            <Pressable style={styles.button}>
-              <MaterialIcons name="settings" size={20} color="black" />
-              <Text style={styles.buttonText}>الاعدادات</Text>
-            </Pressable>
-            <Pressable style={styles.button}>
-              <MaterialCommunityIcons
-                name="account-question"
-                size={20}
-                color="black"
-              />
-              <Text style={styles.buttonText}>مساعده</Text>
-            </Pressable>
-            <Pressable style={styles.button}>
-              <MaterialIcons name="support-agent" size={20} color="black" />
-              <Text style={styles.buttonText}>الدعم</Text>
-            </Pressable>
-          </ScrollView>
-          <Text style={styles.userType}>
-            {userType === "worker" ? "صنايعي" : "عميل"}
-          </Text>
         </View>
-      </Modal>
-    </View>
+        <TouchableOpacity
+          onPress={handleClose}
+          style={{ left: 15, position: "absolute", top: 55 }}
+        >
+          <MaterialIcons name="arrow-back-ios" size={20} color="black" />
+        </TouchableOpacity>
+        <ScrollView style={styles.buttonsContainer}>
+          <Pressable style={styles.button}>
+            <MaterialCommunityIcons name="bell" size={20} color="black" />
+            <Text style={styles.buttonText}>الاشعارات</Text>
+          </Pressable>
+
+          <Pressable style={styles.button}>
+            <FontAwesome6 name="user-shield" size={20} color="black" />
+            <Text style={styles.buttonText}>السلامه</Text>
+          </Pressable>
+
+          <Pressable style={styles.button}>
+            <MaterialIcons name="settings" size={20} color="black" />
+            <Text style={styles.buttonText}>الاعدادات</Text>
+          </Pressable>
+
+          <Pressable style={styles.button}>
+            <MaterialCommunityIcons
+              name="account-question"
+              size={20}
+              color="black"
+            />
+            <Text style={styles.buttonText}>مساعده</Text>
+          </Pressable>
+
+          <Pressable style={styles.button}>
+            <MaterialIcons name="support-agent" size={20} color="black" />
+            <Text style={styles.buttonText}>الدعم</Text>
+          </Pressable>
+        </ScrollView>
+
+        <Text style={styles.userType}>
+          {userType === "worker" ? "صنايعي" : "عميل"}
+        </Text>
+      </Animated.View>
+    </Modal>
   );
 }
+
 const styles = StyleSheet.create({
-  container: {
+  backdrop: {
     flex: 1,
-    backgroundColor: "#bde3e4",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modal: {
-    margin: 0,
-    justifyContent: "center",
-    alignItems: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.4)",
   },
   modalContent: {
+    position: "absolute",
+    right: 0,
+    top: 0,
     width: "70%",
     height: "100%",
     backgroundColor: "rgba(189, 227, 228, 1)",
@@ -140,6 +176,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderTopLeftRadius: 10,
     borderBottomLeftRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: -2, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 5,
   },
   nameText: {
     fontFamily: fonts.medium,
@@ -148,13 +188,11 @@ const styles = StyleSheet.create({
     textAlign: "right",
     marginTop: 4,
   },
-
   profileContainer: {
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
   },
-
   image: {
     width: 80,
     height: 80,
@@ -163,12 +201,10 @@ const styles = StyleSheet.create({
     borderColor: "black",
     marginLeft: 10,
   },
-
   ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
-
   ratingText: {
     fontFamily: fonts.light,
     fontSize: 10,
@@ -184,7 +220,7 @@ const styles = StyleSheet.create({
     flexDirection: "row-reverse",
     height: 50,
     backgroundColor: "rgba(4, 129, 134, 0.15)",
-    marginBlock: 5,
+    marginVertical: 5,
     borderRadius: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -192,7 +228,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     gap: 10,
     alignItems: "center",
-    paddingInline: 20,
+    paddingHorizontal: 20,
   },
   buttonText: {
     fontFamily: fonts.light,
