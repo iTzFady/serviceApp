@@ -1,5 +1,5 @@
 import { fonts } from "@/theme/fonts";
-import { Pressable, Text } from "react-native";
+import { ActivityIndicator, Pressable, Text } from "react-native";
 import { Shadow } from "react-native-shadow-2";
 export default function Button({
   text,
@@ -11,6 +11,7 @@ export default function Button({
   onPressEvent,
   borderRadius = 10,
   style,
+  loading,
 }) {
   return (
     <Shadow
@@ -32,16 +33,24 @@ export default function Button({
         ]}
         onPress={onPressEvent}
       >
-        <Text
-          style={{
-            color: color,
-            fontSize: fontSize,
-            fontFamily: fonts.bold,
-            textAlign: "center",
-          }}
-        >
-          {text}
-        </Text>
+        {loading ? (
+          <ActivityIndicator
+            style={{ marginVertical: "auto", paddingVertical: "auto" }}
+            size="small"
+            color="#000"
+          />
+        ) : (
+          <Text
+            style={{
+              color: color,
+              fontSize: fontSize,
+              fontFamily: fonts.bold,
+              textAlign: "center",
+            }}
+          >
+            {text}
+          </Text>
+        )}
       </Pressable>
     </Shadow>
   );

@@ -4,11 +4,10 @@ import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 const profilePic = require("@/assets/images/default-profile.png");
 export default function RequestCard({
-  name = "ابانوب جرجس لمعي",
-  rating = 4.8,
-  request = "عندي فيشه مش شغاله",
-  date = "الخميس 18 يونيو - الساعه 5",
-  time,
+  name,
+  rating,
+  request,
+  dateTime,
   onPress,
 }) {
   return (
@@ -18,7 +17,7 @@ export default function RequestCard({
           {request}
         </Text>
         <Text style={styles.nameText}>{name}</Text>
-        <Text style={styles.dateText}>{date}</Text>
+        <Text style={styles.dateText}>{dateTime}</Text>
       </View>
 
       <View style={styles.profileContainer}>

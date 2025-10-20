@@ -23,7 +23,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 const logo = require("../assets/images/logo.png");
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-
 export default function LoginPage() {
   const router = useRouter();
   const { updateUser } = useUser();

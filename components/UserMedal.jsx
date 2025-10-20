@@ -17,18 +17,6 @@ import {
 import Modal from "react-native-modal";
 const profilePic = require("@/assets/images/default-profile.png");
 
-const person = {
-  name: "ابانوب جرجس لمعي",
-  rating: 4.8,
-  problem: "عندي فيشه مش شغاله",
-  description: "حصل قفله كبيره ومن ساعتها فيها ريحه",
-  address: "15 شارع عبد العليم متفرع من الزهور -الحضره الجديه اسكندريه",
-  date: "الخميس 18 يونيو - الساعه 5 ",
-  notes: "",
-  image:
-    "https://media.istockphoto.com/id/483724081/photo/yosemite-valley-landscape-and-river-california.jpg?s=2048x2048&w=is&k=20&c=j0OSpP2sAz582wDP0t28BzmwSMb0BJ2li7koJ2yROcA=",
-};
-
 export default function RequestModal({ show, setShow, userType = "worker" }) {
   return (
     <View style={styles.container}>

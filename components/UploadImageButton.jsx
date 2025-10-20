@@ -1,29 +1,72 @@
 import { fonts } from "@/theme/fonts";
 import * as ImagePicker from "expo-image-picker";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import Alert from "./Alert";
 
 export default function UploadButton({ value, onChange }) {
+  const [loading, setLoading] = useState(false);
   async function pickImage() {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status != "granted") {
-      alert("برجاء الموافقة علي الاذونات لاستكمال العملية");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
-      allowsEditing: true,
-      quality: 0.8,
-    });
-    if (!result.canceled) {
-      onChange(result.assets[0].uri);
+    try {
+      setLoading(true);
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert("برجاء الموافقة علي الاذونات لاستكمال العملية");
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "images",
+        allowsEditing: true,
+        quality: 0.8,
+      });
+      if (!result.canceled) {
+        const image = result.assets[0];
+        let file;
+        if (Platform.OS === "web") {
+          file = image.file;
+        } else {
+          const uri = image.uri;
+          const filename = uri.split("/").pop();
+          const match = /\.(\w+)$/.exec(filename ?? "");
+          const type = match ? `image/${match[1]}` : "image/jpeg";
+          file = {
+            uri,
+            name: filename,
+            type,
+          };
+        }
+
+        onChange(file);
+      }
+    } catch (err) {
+      Alert("Error", err);
+    } finally {
+      setLoading(false);
     }
   }
+
   return (
     <View style={{ padding: 20 }}>
       <Pressable style={styles.uploadButton} onPress={pickImage}>
-        <Text style={styles.uploadButtonText}>
-          {value ? "غير الصورة" : "ارفاق صوره"}
-        </Text>
+        {loading ? (
+          <ActivityIndicator
+            style={{ marginVertical: "auto", paddingVertical: "auto" }}
+            size="small"
+            color="#000"
+          />
+        ) : (
+          <Text style={styles.uploadButtonText}>
+            {value ? "غير الصورة" : "ارفاق صوره"}
+          </Text>
+        )}
       </Pressable>
     </View>
   );

@@ -1,4 +1,5 @@
 import { fonts } from "@/theme/fonts";
+import { formatTime } from "@/utility/formatTime";
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   Dimensions,
@@ -14,19 +15,8 @@ import Modal from "react-native-modal";
 const profilePic = require("@/assets/images/default-profile.png");
 const screenHeight = Dimensions.get("window").height;
 
-const person = {
-  name: "ابانوب جرجس لمعي",
-  rating: 4.8,
-  problem: "عندي فيشه مش شغاله",
-  description: "حصل قفله كبيره ومن ساعتها فيها ريحه",
-  address: "15 شارع عبد العليم متفرع من الزهور -الحضره الجديه اسكندريه",
-  date: "الخميس 18 يونيو - الساعه 5 ",
-  notes: "",
-  image:
-    "https://media.istockphoto.com/id/483724081/photo/yosemite-valley-landscape-and-river-california.jpg?s=2048x2048&w=is&k=20&c=j0OSpP2sAz582wDP0t28BzmwSMb0BJ2li7koJ2yROcA=",
-};
-
-export default function RequestModal({ show, setShow }) {
+export default function RequestModal({ show, setShow, request }) {
+  if (!request) return null;
   return (
     <View style={styles.container}>
       <Modal
@@ -52,7 +42,9 @@ export default function RequestModal({ show, setShow }) {
               }}
             >
               <Image style={styles.profilePicStyle} source={profilePic} />
-              <Text style={styles.userDetailText}>{person.name}</Text>
+              <Text style={styles.userDetailText}>
+                {request.requestedBy.name}
+              </Text>
             </View>
             <View style={styles.ratingContainer}>
               <MaterialCommunityIcons
@@ -61,7 +53,7 @@ export default function RequestModal({ show, setShow }) {
                 color="rgba(237, 237, 14, 0.81)"
               />
               <Text style={[styles.userDetailText, { fontSize: 10 }]}>
-                {person.rating}
+                {request.requestedBy.rating}
               </Text>
             </View>
             <TouchableOpacity onPress={() => setShow(false)}>
@@ -69,18 +61,22 @@ export default function RequestModal({ show, setShow }) {
             </TouchableOpacity>
           </View>
           <ScrollView>
-            <Text style={styles.textStyle}>{person.problem}</Text>
-            <Text style={styles.textStyle}>{person.description}</Text>
-            <Text style={styles.textStyle}>{person.address}</Text>
-            <Text style={styles.textStyle}>{person.date}</Text>
-            {person.notes && (
-              <Text style={styles.textStyle}>{person.notes}ملاحظات: </Text>
+            <Text style={styles.textStyle}>{request.title}</Text>
+            <Text style={styles.textStyle}>{request.description}</Text>
+            <Text style={styles.textStyle}>{request.location}</Text>
+            <Text style={styles.textStyle}>{formatTime(request.dateTime)}</Text>
+            {request.notes && (
+              <Text style={styles.textStyle}>
+                {`ملاحظات: ${request.notes}`}
+              </Text>
             )}
-            {person.image && (
+            {request.imageUrls[0] && (
               <Image
                 resizeMode="contain"
                 style={styles.requestImage}
-                source={{ uri: person.image }}
+                source={{
+                  uri: `https://localhost:7032${request.imageUrls[0]}`,
+                }}
               />
             )}
           </ScrollView>

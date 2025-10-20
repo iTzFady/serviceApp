@@ -5,20 +5,31 @@ import Switch from "@/components/Switch";
 import UserMedal from "@/components/UserMedal";
 import { ThemeContext } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
+import { formatTime } from "@/utility/formatTime";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import { useContext, useEffect, useState } from "react";
-import { StatusBar, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useCallback, useContext, useEffect, useState } from "react";
+import {
+  FlatList,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function Request() {
   const { user, updateUser } = useUser();
   const [online, setOnline] = useState(user?.isAvailable);
+  const [requests, setRequests] = useState([]);
   const [showMedal, setShowMedal] = useState(false);
   const [showUserMedal, setShowUserMedal] = useState(false);
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
+  const [selectedRequest, setSelectedRequest] = useState(null);
   const [token, setToken] = useState(null);
   const router = useRouter();
   useEffect(() => {
@@ -32,7 +43,48 @@ export default function Request() {
     };
     checkToken();
   }, [token, router]);
-
+  useEffect(() => {
+    if (!token || !user?.id) return;
+    const fetchRequests = async () => {
+      try {
+        axios({
+          method: "get",
+          url: `${apiUrl}/requests/worker/${user?.id}`,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((res) => {
+            if (Array.isArray(res.data)) {
+              setRequests(res.data);
+            } else {
+              console.log("Unexpected response:", res.data);
+            }
+          })
+          .catch((err) => {
+            Alert("Error", "Failed to fetch requests");
+          });
+      } catch (err) {
+        Alert("Error", err.message);
+      }
+    };
+    fetchRequests();
+  }, [token, user?.id]);
+  const renderItems = useCallback(({ item }) => {
+    return (
+      <RequestCard
+        key={item.id}
+        name={item.requestedBy.name || "Unknown"}
+        rating={item.requestedBy.rating || 0}
+        request={item.title || "No title"}
+        dateTime={formatTime(item.dateTime)}
+        onPress={() => {
+          setShowMedal(!showMedal);
+          setSelectedRequest(item);
+        }}
+      />
+    );
+  });
   return (
     <View style={styles.safeArea}>
       <View style={{ backgroundColor: "#Bde3e4" }}>
@@ -48,7 +100,6 @@ export default function Request() {
               <Switch
                 state={online}
                 toggleState={(value) => {
-                  console.log(value);
                   axios({
                     method: "put",
                     url: `${apiUrl}/user/availability`,
@@ -60,6 +111,7 @@ export default function Request() {
                   })
                     .then((res) => {
                       setOnline(res.data.isAvailable);
+                      console.log(res.data.isAvailable);
                     })
                     .catch((err) => {
                       if (err.response && err.response.data) {
@@ -91,11 +143,41 @@ export default function Request() {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={styles.container}>
-          <RequestCard onPress={() => setShowMedal(!showMedal)} />
-        </View>
+        {Platform.OS === "web" ? (
+          <ScrollView style={{ height: "90vh" }}>
+            <FlatList
+              style={styles.container}
+              data={requests}
+              renderItem={renderItems}
+              keyExtractor={(item, index) =>
+                item.id?.toString() || index.toString()
+              }
+              showsVerticalScrollIndicator={false}
+              initialNumToRender={8}
+              windowSize={5}
+              removeClippedSubviews={true}
+            />
+          </ScrollView>
+        ) : (
+          <FlatList
+            style={styles.container}
+            data={requests}
+            renderItem={renderItems}
+            keyExtractor={(item, index) =>
+              item.id?.toString() || index.toString()
+            }
+            showsVerticalScrollIndicator={false}
+            initialNumToRender={8}
+            windowSize={5}
+            removeClippedSubviews={true}
+          />
+        )}
       </View>
-      <RequestMedal show={showMedal} setShow={setShowMedal} />
+      <RequestMedal
+        request={selectedRequest}
+        show={showMedal}
+        setShow={setShowMedal}
+      />
       <UserMedal show={showUserMedal} setShow={setShowUserMedal} />
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </View>

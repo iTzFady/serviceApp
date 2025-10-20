@@ -1,3 +1,4 @@
+import AlertMessage from "@/components/Alert";
 import Button from "@/components/Button";
 import DynamicIcon from "@/components/DynamicIcon";
 import InputField from "@/components/InputField";
@@ -34,6 +35,7 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function RequestWorker() {
   const { user, updateUser } = useUser();
+  const [loading, setLoading] = useState(false);
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
   const [token, setToken] = useState(null);
@@ -69,7 +71,9 @@ export default function RequestWorker() {
     };
     checkToken();
   }, [token, router]);
+
   const onSubmit = (data) => {
+    setLoading(true);
     const formData = new FormData();
     const dateTime = `${data.date}T${data.time}:00`;
     formData.append("requestedByUserId", user?.id);
@@ -79,27 +83,46 @@ export default function RequestWorker() {
     formData.append("location", data.address);
     formData.append("dateTime", dateTime);
     formData.append("notes", data.notes);
-    formData.append("images", {
-      uri: data.image.uri,
-      type: data.image.type,
-      name: data.image.fileName || "photo.jpg",
-    });
-
-    axios({
-      url: `${apiUrl}/requests`,
-      method: "post",
-      data: formData,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    })
-      .then((res) => {
-        console.log(res);
+    formData.append("images", data.image);
+    try {
+      axios({
+        url: `${apiUrl}/requests`,
+        method: "post",
+        data: formData,
+        timeout: 1000,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+        transformRequest: (data, headers) => data,
       })
-      .catch((err) => {
-        console.log(err);
-      });
+        .then((res) => {
+          AlertMessage("Alert", res.data.message);
+          router.replace("/");
+        })
+        .catch((err) => {
+          if (err.response && err.response.data) {
+            AlertMessage(
+              "Error",
+              err.response.data?.message || JSON.stringify(err.response.data)
+            );
+          } else if (err.request) {
+            AlertMessage(
+              "Network Error",
+              "Unable to reach the server. Please check your connection."
+            );
+          } else {
+            AlertMessage(
+              "Error",
+              "Something went wrong. Please try again later."
+            );
+          }
+        });
+    } catch (err) {
+      AlertMessage("Error", err);
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <View style={styles.safeArea}>
@@ -168,9 +191,9 @@ export default function RequestWorker() {
                 control={control}
                 name="type"
                 rules={{
-                  required: "Name is required",
+                  required: "title is required",
                   pattern: {
-                    message: "Invalid name",
+                    message: "Invalid title",
                   },
                 }}
                 render={({ field: { onChange, value } }) => (
@@ -190,9 +213,9 @@ export default function RequestWorker() {
                 control={control}
                 name="description"
                 rules={{
-                  required: "Name is required",
+                  required: "Description is required",
                   pattern: {
-                    message: "Invalid name",
+                    message: "Invalid description",
                   },
                 }}
                 render={({ field: { onChange, value } }) => (
@@ -212,9 +235,9 @@ export default function RequestWorker() {
                 control={control}
                 name="address"
                 rules={{
-                  required: "Name is required",
+                  required: "Address is required",
                   pattern: {
-                    message: "Invalid name",
+                    message: "Invalid address",
                   },
                 }}
                 render={({ field: { onChange, value } }) => (
@@ -341,12 +364,6 @@ export default function RequestWorker() {
               <Controller
                 control={control}
                 name="image"
-                rules={{
-                  required: "image is required",
-                  pattern: {
-                    message: "You must upload an image",
-                  },
-                }}
                 render={({ field: { onChange, value } }) => (
                   <UploadButton onChange={onChange} value={value} />
                 )}
@@ -380,6 +397,7 @@ export default function RequestWorker() {
                 fontSize={20}
                 borderRadius={5}
                 onPressEvent={handleSubmit(onSubmit)}
+                loading={loading}
               />
             </View>
           </View>

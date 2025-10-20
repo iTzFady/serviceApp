@@ -6,8 +6,7 @@ import WorkerCard from "@/components/WorkerCard";
 import { ThemeContext } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
 import { fonts } from "@/theme/fonts";
-import Entypo from "@expo/vector-icons/Entypo";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Entypo, FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import axios from "axios";
