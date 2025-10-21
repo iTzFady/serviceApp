@@ -117,7 +117,6 @@ export default function RequestModal({
               {request.requestedBy.name}
             </Text>
           </View>
-
           <View style={styles.ratingContainer}>
             <MaterialCommunityIcons
               name="star"

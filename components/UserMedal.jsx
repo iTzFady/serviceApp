@@ -4,6 +4,7 @@ import {
   FontAwesome6,
   MaterialCommunityIcons,
   MaterialIcons,
+  Octicons,
 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
@@ -132,7 +133,10 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
             <MaterialCommunityIcons name="bell" size={20} color="black" />
             <Text style={styles.buttonText}>الاشعارات</Text>
           </Pressable>
-
+          <Pressable style={styles.button}>
+            <Octicons name="log" size={20} color="black" />
+            <Text style={styles.buttonText}>سجل الطلبات</Text>
+          </Pressable>
           <Pressable style={styles.button}>
             <FontAwesome6 name="user-shield" size={20} color="black" />
             <Text style={styles.buttonText}>السلامه</Text>

@@ -1,14 +1,15 @@
 import Alert from "@/components/Alert";
+import MiniRequest from "@/components/MiniRequest";
 import SearchBar from "@/components/SearchBar";
 import SpecialityChip from "@/components/specialityChip.jsx";
+import UserMedal from "@/components/UserMedal";
 import WebSelect from "@/components/WebSelect";
 import WorkerCard from "@/components/WorkerCard";
 import { ThemeContext } from "@/context/ThemeContext";
 import { useUser } from "@/context/UserContext";
 import { fonts } from "@/theme/fonts";
-import { Entypo, FontAwesome } from "@expo/vector-icons";
+import { Entypo, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import axios from "axios";
 import { useRouter } from "expo-router";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -29,19 +30,19 @@ import Animated, { LinearTransition } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Regions } from "../data/regions";
 import { Speciality } from "../data/speciality";
-
 const logo = require("../assets/images/logo.png");
 export default function Index() {
   const { user, updateUser } = useUser();
   const [selectedChip, setSelectedChip] = useState(null);
   const [currentRegion, setCurrentRegion] = useState(null);
   const [workers, setWorkers] = useState([]);
+  const [lastRequest, setLastRequest] = useState(null);
   const [currentUser, setCurrentUser] = useState(user?.name);
   const [token, setToken] = useState(null);
+  const [showUserMedal, setShowUserMedal] = useState(false);
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
   const router = useRouter();
-
   const loadToken = useCallback(async () => {
     const storedToken = await AsyncStorage.getItem("userToken");
     if (!storedToken) router.replace("/login");
@@ -87,7 +88,25 @@ export default function Index() {
       .catch(handleError);
     return () => controller.abort();
   }, [token]);
-
+  useEffect(() => {
+    if (!token) return;
+    const controller = new AbortController();
+    axios({
+      method: "get",
+      url: `${apiUrl}/requests/me/last`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (res.data.code) {
+          setLastRequest(res.data.data);
+        }
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [token]);
   const handleError = useCallback((err) => {
     if (err.response && err.response.data)
       Alert(
@@ -145,6 +164,16 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.topStyle}>
+        <TouchableOpacity
+          style={styles.medalButton}
+          onPress={() => setShowUserMedal(true)}
+        >
+          <MaterialIcons
+            name="settings"
+            size={25}
+            color="rgba(51, 109, 3, 1)="
+          />
+        </TouchableOpacity>
         <Image style={styles.logo} source={logo} resizeMode="contain" />
         <TouchableOpacity
           style={styles.settingsButton}
@@ -225,6 +254,27 @@ export default function Index() {
             />
           </View>
         )}
+        {lastRequest ? (
+          <View style={styles.workerCategory}>
+            <View style={styles.category}>
+              <Text style={styles.categoryRightText}>
+                تم الارسال الطلب ....
+              </Text>
+              <TouchableOpacity
+                style={{ width: "50%" }}
+                onPress={() => console.log("Hello World")}
+              >
+                <Text style={styles.categoryLeftText}>عرض كل الطلبات</Text>
+              </TouchableOpacity>
+            </View>
+            <MiniRequest
+              name={lastRequest.requestedFor.name}
+              rating={lastRequest.requestedFor.rating}
+              status={lastRequest.status}
+              phoneNumber={lastRequest.requestedFor.phoneNumber}
+            />
+          </View>
+        ) : null}
         <View style={styles.workerCategory}>
           <View style={styles.category}>
             <Text style={styles.categoryRightText}>الصنايعه المتاحيين...</Text>
@@ -234,8 +284,7 @@ export default function Index() {
           {Platform.OS === "web" ? (
             <FlatList
               keyExtractor={keyExtractor}
-              style={styles.workerCardContainer}
-              contentContainerStyle={{ height: "60vh" }}
+              contentContainerStyle={{ height: "70vh" }}
               renderItem={renderItem}
               data={filteredWorkers}
               scrollEnabled={true}
@@ -247,7 +296,6 @@ export default function Index() {
             <Animated.FlatList
               keyExtractor={keyExtractor}
               itemLayoutAnimation={LinearTransition}
-              style={styles.workerCardContainer}
               renderItem={renderItem}
               data={filteredWorkers}
               showsVerticalScrollIndicator={false}
@@ -261,6 +309,7 @@ export default function Index() {
           )}
         </View>
       </View>
+      <UserMedal show={showUserMedal} setShow={setShowUserMedal} />
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </SafeAreaView>
   );
@@ -282,6 +331,11 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 5,
     marginLeft: 20,
+  },
+  medalButton: {
+    position: "absolute",
+    right: 5,
+    marginRight: 20,
   },
   container: {
     alignItems: "center",
@@ -318,7 +372,8 @@ const styles = StyleSheet.create({
   workerCategory: {
     flexDirection: "column",
     width: "100%",
-    padding: 15,
+    paddingHorizontal: 15,
+    marginBlock: 5,
   },
   category: {
     flexDirection: "row-reverse",
@@ -384,8 +439,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginRight: 15,
     fontFamily: fonts.extraLight,
-  },
-  workerCardContainer: {
-    width: "100%",
   },
 });

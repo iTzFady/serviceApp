@@ -12,20 +12,7 @@ export default function RequestCard({
   onPress,
 }) {
   return (
-    <Pressable
-      style={[
-        styles.container,
-        {
-          backgroundColor:
-            status === "Accepted"
-              ? "#b7f4d8"
-              : status === "Canceled"
-              ? "#d24d57"
-              : "#fff",
-        },
-      ]}
-      onPress={onPress}
-    >
+    <Pressable style={styles.container} onPress={onPress}>
       <View style={styles.textContainer}>
         <Text numberOfLines={1} style={styles.requestText}>
           {request}
@@ -53,9 +40,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderColor: "rgba(0, 0, 0, 0.2)",
-    borderWidth: 1,
-    backgroundColor: "white",
+    backgroundColor: "rgba(17, 125, 129, 0.04)",
     padding: 16,
     marginVertical: 8,
     borderRadius: 5,
@@ -65,12 +50,10 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 6,
   },
-
   textContainer: {
     flex: 1,
     marginRight: 12,
   },
-
   requestText: {
     fontFamily: fonts.bold,
     fontSize: 15,
