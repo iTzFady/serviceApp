@@ -1,4 +1,4 @@
-import Alert from "@/components/Alert";
+import { default as Alert, default as AlertMessage } from "@/components/Alert";
 import RequestCard from "@/components/RequestCard";
 import RequestMedal from "@/components/RequestModal";
 import Switch from "@/components/Switch";
@@ -14,7 +14,6 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import {
   FlatList,
   Platform,
-  ScrollView,
   StatusBar,
   StyleSheet,
   TouchableOpacity,
@@ -42,52 +41,62 @@ export default function Request() {
       }
     };
     checkToken();
-  }, [token, router]);
+  }, [router]);
   useEffect(() => {
-    if (!token || !user?.id) return;
+    if (user?.isAvailable !== undefined && user?.role === "Worker") {
+      setOnline(user.isAvailable);
+    }
+  }, [user?.isAvailable, user?.role]);
+  useEffect(() => {
+    if (!token || !user?.id || user?.role === "Client") return;
+    const controller = new AbortController();
     const fetchRequests = async () => {
       try {
-        axios({
-          method: "get",
-          url: `${apiUrl}/requests/worker/${user?.id}`,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        axios
+          .get(`${apiUrl}/requests/worker/${user?.id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            signal: controller.signal,
+          })
           .then((res) => {
             if (Array.isArray(res.data)) {
               setRequests(res.data);
-            } else {
-              console.log("Unexpected response:", res.data);
             }
-          })
-          .catch((err) => {
-            Alert("Error", "Failed to fetch requests");
           });
       } catch (err) {
-        Alert("Error", err.message);
+        if (axios.isCancel(err)) return;
+        AlertMessage("Error", "Faild to fetch requests");
       }
     };
     fetchRequests();
-  }, [token, user?.id]);
-  const renderItems = useCallback(
-    ({ item }) => {
-      return (
-        <RequestCard
-          key={item.id}
-          name={item.requestedBy.name || "Unknown"}
-          rating={item.requestedBy.rating || 0}
-          request={item.title || "No title"}
-          dateTime={formatTime(item.dateTime)}
-          onPress={() => {
-            setShowMedal(!showMedal);
-            setSelectedRequest(item);
-          }}
-        />
-      );
-    },
-    [showMedal]
-  );
+  }, [token, user?.id, user?.role]);
+  const renderItems = useCallback(({ item }) => {
+    return (
+      <RequestCard
+        key={item.id}
+        name={item.requestedBy.name || "Unknown"}
+        rating={item.requestedBy.rating || 0}
+        request={item.title || "No title"}
+        dateTime={formatTime(item.dateTime)}
+        status={item.status}
+        onPress={() => {
+          setShowMedal(!showMedal);
+          setSelectedRequest(item);
+        }}
+      />
+    );
+  }, []);
+  const AcceptRequest = useCallback((id) => {
+    setRequests((prev) =>
+      prev.map((request) =>
+        request.id === id ? { ...request, status: "Accepted" } : request
+      )
+    );
+  }, []);
+  const removeItem = useCallback((id) => {
+    setRequests((prev) => prev.filter((work) => work.id !== id));
+  }, []);
   return (
     <View style={styles.safeArea}>
       <View style={{ backgroundColor: "#Bde3e4" }}>
@@ -99,45 +108,51 @@ export default function Request() {
             >
               <FontAwesome name="sliders" size={25} color="rgba(0,0,0,1" />
             </TouchableOpacity>
-            <View style={styles.toggleOnline}>
-              <Switch
-                state={online}
-                toggleState={(value) => {
-                  axios({
-                    method: "put",
-                    url: `${apiUrl}/user/availability`,
-                    data: value,
-                    headers: {
-                      Authorization: `Bearer ${token}`,
-                      "Content-Type": "application/json",
-                    },
-                  })
-                    .then((res) => {
-                      setOnline(res.data.isAvailable);
-                      console.log(res.data.isAvailable);
+            {user?.role === "Worker" ? (
+              <View style={styles.toggleOnline}>
+                <Switch
+                  state={online}
+                  toggleState={(value) => {
+                    axios({
+                      method: "put",
+                      url: `${apiUrl}/user/availability`,
+                      data: value,
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                      },
                     })
-                    .catch((err) => {
-                      if (err.response && err.response.data) {
-                        Alert(
-                          "Error",
-                          err.response.data?.message ||
-                            JSON.stringify(err.response.data)
-                        );
-                      } else if (err.request) {
-                        Alert(
-                          "Network Error",
-                          "Unable to reach the server. Please check your connection."
-                        );
-                      } else {
-                        Alert(
-                          "Error",
-                          "Something went wrong. Please try again later."
-                        );
-                      }
-                    });
-                }}
-              />
-            </View>
+                      .then((res) => {
+                        setOnline(res.data.isAvailable);
+                        updateUser({
+                          ...user,
+                          isAvailable: res.data.isAvailable,
+                        });
+                      })
+                      .catch((err) => {
+                        if (err.response && err.response.data) {
+                          Alert(
+                            "Error",
+                            err.response.data?.message ||
+                              JSON.stringify(err.response.data)
+                          );
+                        } else if (err.request) {
+                          Alert(
+                            "Network Error",
+                            "Unable to reach the server. Please check your connection."
+                          );
+                        } else {
+                          Alert(
+                            "Error",
+                            "Something went wrong. Please try again later."
+                          );
+                        }
+                      });
+                  }}
+                />
+              </View>
+            ) : null}
+
             <TouchableOpacity
               style={styles.topButton}
               onPress={() => setShowUserMedal(true)}
@@ -147,20 +162,20 @@ export default function Request() {
           </View>
         </View>
         {Platform.OS === "web" ? (
-          <ScrollView style={{ height: "90vh" }}>
-            <FlatList
-              style={styles.container}
-              data={requests}
-              renderItem={renderItems}
-              keyExtractor={(item, index) =>
-                item.id?.toString() || index.toString()
-              }
-              showsVerticalScrollIndicator={false}
-              initialNumToRender={8}
-              windowSize={5}
-              removeClippedSubviews={true}
-            />
-          </ScrollView>
+          <FlatList
+            style={styles.container}
+            data={requests}
+            renderItem={renderItems}
+            contentContainerStyle={{ height: "90vh" }}
+            keyExtractor={(item, index) =>
+              item.id?.toString() || index.toString()
+            }
+            showsVerticalScrollIndicator={false}
+            initialNumToRender={8}
+            windowSize={5}
+            removeClippedSubviews={true}
+            ListFooterComponent={<View style={{ height: 50 }} />}
+          />
         ) : (
           <FlatList
             style={styles.container}
@@ -173,6 +188,9 @@ export default function Request() {
             initialNumToRender={8}
             windowSize={5}
             removeClippedSubviews={true}
+            maxToRenderPerBatch={5}
+            updateCellsBatchingPeriod={100}
+            ListFooterComponent={<View style={{ height: 50 }} />}
           />
         )}
       </View>
@@ -180,6 +198,10 @@ export default function Request() {
         request={selectedRequest}
         show={showMedal}
         setShow={setShowMedal}
+        url={apiUrl}
+        token={token}
+        acceptRequest={AcceptRequest}
+        removeRequest={removeItem}
       />
       <UserMedal show={showUserMedal} setShow={setShowUserMedal} />
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />

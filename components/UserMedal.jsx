@@ -1,10 +1,13 @@
+import { useUser } from "@/context/UserContext";
 import { fonts } from "@/theme/fonts";
 import {
   FontAwesome6,
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
-import { useEffect, useRef } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import { useCallback, useEffect, useRef } from "react";
 import {
   Animated,
   Dimensions,
@@ -18,13 +21,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
+import AlertMessage from "./Alert";
+import RatingStars from "./RatingStars";
 const profilePic = require("@/assets/images/default-profile.png");
 const { width, height } = Dimensions.get("window");
-
 export default function RequestModal({ show, setShow, userType = "worker" }) {
   const slideAnim = useRef(new Animated.Value(width)).current;
-
+  const { user, updateUser } = useUser();
   useEffect(() => {
     if (show) {
       Animated.timing(slideAnim, {
@@ -40,13 +43,6 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
       }).start();
     }
   }, [show, slideAnim]);
-  const handleClose = () => {
-    Animated.timing(slideAnim, {
-      toValue: width,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => setShow(false));
-  };
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gesture) => {
@@ -73,6 +69,23 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
       },
     })
   ).current;
+  const handleClose = useCallback(() => {
+    Animated.timing(slideAnim, {
+      toValue: width,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setShow(false));
+  }, [slideAnim, setShow]);
+  const handleLogout = useCallback(async () => {
+    try {
+      await AsyncStorage.removeItem("userToken");
+      updateUser(null);
+    } catch (err) {
+      AlertMessage("Error", err);
+    } finally {
+      router.replace("/login");
+    }
+  }, [updateUser]);
   return (
     <Modal
       visible={show}
@@ -100,18 +113,11 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
         >
           <Image source={profilePic} style={styles.image} resizeMode="cover" />
           <View style={styles.profileContainer}>
-            <Text style={styles.nameText}>فادي سامي</Text>
+            <Text style={styles.nameText}>{user?.name}</Text>
 
             <View style={styles.ratingContainer}>
-              <Text style={styles.ratingText}>4.8</Text>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <MaterialCommunityIcons
-                  key={i}
-                  name="star"
-                  size={18}
-                  color="rgba(237, 237, 14, 0.81)"
-                />
-              ))}
+              <Text style={styles.ratingText}>{user?.rating}</Text>
+              <RatingStars rating={user?.rating} />
             </View>
           </View>
         </View>
@@ -150,10 +156,14 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
             <MaterialIcons name="support-agent" size={20} color="black" />
             <Text style={styles.buttonText}>الدعم</Text>
           </Pressable>
+          <Pressable onPress={handleLogout} style={styles.button}>
+            <MaterialIcons name="logout" size={20} color="black" />
+            <Text style={styles.buttonText}>تسجيل خروج</Text>
+          </Pressable>
         </ScrollView>
 
         <Text style={styles.userType}>
-          {userType === "worker" ? "صنايعي" : "عميل"}
+          {user?.role === "Worker" ? "صنايعي" : "عميل"}
         </Text>
       </Animated.View>
     </Modal>

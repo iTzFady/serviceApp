@@ -47,6 +47,7 @@ export default function RequestWorker() {
     reset,
     setValue,
   } = useForm({
+    mode: "onBlur",
     defaultValues: {
       type: "",
       description: "",
@@ -70,7 +71,7 @@ export default function RequestWorker() {
       }
     };
     checkToken();
-  }, [token, router]);
+  }, [router]);
 
   const onSubmit = (data) => {
     setLoading(true);
@@ -84,45 +85,40 @@ export default function RequestWorker() {
     formData.append("dateTime", dateTime);
     formData.append("notes", data.notes);
     formData.append("images", data.image);
-    try {
-      axios({
-        url: `${apiUrl}/requests`,
-        method: "post",
-        data: formData,
-        timeout: 1000,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-        transformRequest: (data, headers) => data,
+    axios({
+      url: `${apiUrl}/requests`,
+      method: "post",
+      data: formData,
+      timeout: 5000,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+      transformRequest: (data, headers) => data,
+    })
+      .then((res) => {
+        AlertMessage("Alert", res.data.message);
+        router.replace("/");
       })
-        .then((res) => {
-          AlertMessage("Alert", res.data.message);
-          router.replace("/");
-        })
-        .catch((err) => {
-          if (err.response && err.response.data) {
-            AlertMessage(
-              "Error",
-              err.response.data?.message || JSON.stringify(err.response.data)
-            );
-          } else if (err.request) {
-            AlertMessage(
-              "Network Error",
-              "Unable to reach the server. Please check your connection."
-            );
-          } else {
-            AlertMessage(
-              "Error",
-              "Something went wrong. Please try again later."
-            );
-          }
-        });
-    } catch (err) {
-      AlertMessage("Error", err);
-    } finally {
-      setLoading(false);
-    }
+      .catch((err) => {
+        if (err.response && err.response.data) {
+          AlertMessage(
+            "Error",
+            err.response.data?.message || JSON.stringify(err.response.data)
+          );
+        } else if (err.request) {
+          AlertMessage(
+            "Network Error",
+            "Unable to reach the server. Please check your connection."
+          );
+        } else {
+          AlertMessage(
+            "Error",
+            "Something went wrong. Please try again later."
+          );
+        }
+      })
+      .finally(() => setLoading(false));
   };
   return (
     <View style={styles.safeArea}>

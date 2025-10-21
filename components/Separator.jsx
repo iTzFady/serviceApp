@@ -1,6 +1,7 @@
+import { memo } from "react";
 import { View } from "react-native";
 
-export default function Separator({ separatorWidth, margin }) {
+function Separator({ separatorWidth, margin }) {
   return (
     <View
       style={{
@@ -13,3 +14,4 @@ export default function Separator({ separatorWidth, margin }) {
     />
   );
 }
+export default memo(Separator);

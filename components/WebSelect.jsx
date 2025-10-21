@@ -1,13 +1,8 @@
 import { fonts } from "@/theme/fonts";
+import { memo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-export default function WebSelect({
-  data,
-  value,
-  onChange,
-  label,
-  placeHolder,
-}) {
+function WebSelect({ data, value, onChange, label, placeHolder }) {
   return (
     <View style={styles.containter}>
       {label && <Text style={styles.label}>{label}</Text>}
@@ -54,3 +49,4 @@ const styles = StyleSheet.create({
     writingDirection: "rtl",
   },
 });
+export default memo(WebSelect);

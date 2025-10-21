@@ -8,10 +8,24 @@ export default function RequestCard({
   rating,
   request,
   dateTime,
+  status,
   onPress,
 }) {
   return (
-    <Pressable style={styles.container} onPress={onPress}>
+    <Pressable
+      style={[
+        styles.container,
+        {
+          backgroundColor:
+            status === "Accepted"
+              ? "#b7f4d8"
+              : status === "Canceled"
+              ? "#d24d57"
+              : "#fff",
+        },
+      ]}
+      onPress={onPress}
+    >
       <View style={styles.textContainer}>
         <Text numberOfLines={1} style={styles.requestText}>
           {request}

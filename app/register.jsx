@@ -35,6 +35,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(true);
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   const [role, setRole] = useState("Client");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const {
     control,
@@ -43,6 +44,7 @@ export default function RegisterPage() {
     reset,
     setValue,
   } = useForm({
+    mode: "onBlur",
     defaultValues: {
       name: "",
       phoneNumber: "",
@@ -50,9 +52,9 @@ export default function RegisterPage() {
       password: "",
       confirmPassword: "",
       Role: role,
-      NationalNumber: null,
-      speciality: null,
-      region: null,
+      NationalNumber: "",
+      speciality: "",
+      region: "",
     },
   });
   const onSubmit = async (data) => {
@@ -63,6 +65,7 @@ export default function RegisterPage() {
         "Please ensure that both password fields match before continuing."
       );
     }
+    setLoading(true);
     await axios({
       method: "post",
       url: `${apiUrl}/user/register`,
@@ -97,7 +100,8 @@ export default function RegisterPage() {
         } else {
           Alert("Error", "Something went wrong. Please try again later.");
         }
-      });
+      })
+      .finally(() => setLoading(false));
   };
   const renderDropdownItems = (item) => {
     return (
@@ -425,6 +429,7 @@ export default function RegisterPage() {
             backgroundColor="rgba(127,186,78,1)"
             fontSize={24}
             onPressEvent={handleSubmit(onSubmit)}
+            loading={loading}
           />
         </View>
       </KeyboardAvoidingView>

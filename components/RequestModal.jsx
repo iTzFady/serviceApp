@@ -1,8 +1,10 @@
 import { fonts } from "@/theme/fonts";
 import { formatTime } from "@/utility/formatTime";
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
-import React, { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Animated,
   Dimensions,
   Image,
@@ -15,14 +17,24 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Alert from "./Alert";
 
 const profilePic = require("@/assets/images/default-profile.png");
 const screenHeight = Dimensions.get("window").height;
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-export default function RequestModal({ show, setShow, request }) {
+export default function RequestModal({
+  show,
+  setShow,
+  request,
+  token,
+  removeRequest,
+  acceptRequest,
+}) {
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
   const [visible, setVisible] = useState(show);
-
+  const [acceptLoading, setAcceptLoading] = useState(false);
+  const [rejectLoading, setRejectLoading] = useState(false);
   useEffect(() => {
     if (show) {
       setVisible(true);
@@ -41,7 +53,48 @@ export default function RequestModal({ show, setShow, request }) {
   }, [show, slideAnim]);
 
   if (!visible || !request) return null;
+  const handleRequest = (decision) => {
+    if (decision === "accept") setAcceptLoading(true);
+    if (decision === "reject") setRejectLoading(true);
 
+    axios({
+      method: decision === "reject" ? "delete" : "put",
+      url: `${apiUrl}/requests/${request.id}/${
+        decision === "reject" ? "reject" : "accept"
+      }`,
+      timeout: 15000,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.data.code === "REQUEST_REJECTED") {
+          removeRequest(request.id);
+        } else if (res.data.code === "REQUEST_ACCEPTED") {
+          acceptRequest(request.id);
+        }
+      })
+      .catch((err) => {
+        if (err.response && err.response.data) {
+          Alert(
+            "Error",
+            err.response.data?.message || JSON.stringify(err.response.data)
+          );
+        } else if (err.request) {
+          Alert(
+            "Network Error",
+            "Unable to reach the server. Please check your connection."
+          );
+        } else {
+          Alert("Error", "Something went wrong. Please try again later.");
+        }
+      })
+      .finally(() => {
+        setAcceptLoading(false);
+        setRejectLoading(false);
+        setShow(false);
+      });
+  };
   return (
     <Modal
       transparent
@@ -81,7 +134,10 @@ export default function RequestModal({ show, setShow, request }) {
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={{ flex: 1 }}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+        >
           <Text style={styles.textStyle}>{request.title}</Text>
           <Text style={styles.textStyle}>{request.description}</Text>
           <Text style={styles.textStyle}>{request.location}</Text>
@@ -105,16 +161,36 @@ export default function RequestModal({ show, setShow, request }) {
         <View style={styles.buttonContainer}>
           <Pressable
             style={[styles.button, { backgroundColor: "rgba(2, 63, 65, 1)" }]}
+            onPress={() => handleRequest("accept")}
+            disabled={acceptLoading || rejectLoading}
           >
-            <Text style={styles.buttonText}>قبول</Text>
+            {acceptLoading ? (
+              <ActivityIndicator
+                style={{ marginVertical: "auto", paddingVertical: "auto" }}
+                size="small"
+                color="#000"
+              />
+            ) : (
+              <Text style={styles.buttonText}>قبول</Text>
+            )}
           </Pressable>
           <Pressable
             style={[
               styles.button,
               { backgroundColor: "rgba(255, 255, 255, 0.3)" },
             ]}
+            onPress={() => handleRequest("reject")}
+            disabled={acceptLoading || rejectLoading}
           >
-            <Text style={styles.buttonText}>رفض</Text>
+            {rejectLoading ? (
+              <ActivityIndicator
+                style={{ marginVertical: "auto", paddingVertical: "auto" }}
+                size="small"
+                color="#000"
+              />
+            ) : (
+              <Text style={styles.buttonText}>رفض</Text>
+            )}
           </Pressable>
         </View>
       </Animated.View>
@@ -135,7 +211,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
-    minHeight: screenHeight * 0.6,
+    height: screenHeight * 0.8,
     ...Platform.select({
       web: {
         boxShadow: "0px -4px 12px rgba(0,0,0,0.5)",

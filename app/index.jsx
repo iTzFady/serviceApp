@@ -11,7 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import axios from "axios";
 import { useRouter } from "expo-router";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
   Image,
@@ -36,87 +36,71 @@ export default function Index() {
   const [selectedChip, setSelectedChip] = useState(null);
   const [currentRegion, setCurrentRegion] = useState(null);
   const [workers, setWorkers] = useState([]);
-  const [filterdWorkers, setFilteredWorkers] = useState(workers);
   const [currentUser, setCurrentUser] = useState(user?.name);
   const [token, setToken] = useState(null);
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
   const router = useRouter();
+
+  const loadToken = useCallback(async () => {
+    const storedToken = await AsyncStorage.getItem("userToken");
+    if (!storedToken) router.replace("/login");
+    else setToken(storedToken.trim());
+  }, [router]);
   useEffect(() => {
-    const checkToken = async () => {
-      const storedToken = await AsyncStorage.getItem("userToken");
-      if (!storedToken) {
-        router.replace("/login");
-      } else {
-        setToken(storedToken.trim());
-      }
-    };
-    checkToken();
-  }, [token, router]);
+    loadToken();
+  }, [loadToken]);
+
   useEffect(() => {
-    if (token !== null) {
-      axios({
-        method: "get",
-        url: `${apiUrl}/user/me`,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    if (!token) return;
+    const controller = new AbortController();
+    axios({
+      method: "get",
+      url: `${apiUrl}/user/me`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        updateUser(res.data);
+        if (!currentUser && res.data.name) {
+          setCurrentUser(res.data.name);
+        }
       })
-        .then((res) => {
-          updateUser(res.data);
-          if (!currentUser && res.data.name) {
-            setCurrentUser(res.data.name);
-          }
-        })
-        .catch((err) => {
-          if (err.response && err.response.data) {
-            Alert(
-              "Error",
-              err.response.data?.message || JSON.stringify(err.response.data)
-            );
-            AsyncStorage.removeItem("userToken");
-          } else if (err.request) {
-            Alert(
-              "Network Error",
-              "Unable to reach the server. Please check your connection."
-            );
-          } else {
-            Alert("Error", "Something went wrong. Please try again later.");
-            AsyncStorage.removeItem("userToken");
-          }
-        });
-    }
-  }, [token, apiUrl, updateUser]);
+      .catch(handleError);
+    return () => controller.abort();
+  }, [token]);
   useEffect(() => {
-    if (token) {
-      axios({
-        method: "get",
-        url: `${apiUrl}/user/workers`,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    if (!token) return;
+    const controller = new AbortController();
+    axios({
+      method: "get",
+      url: `${apiUrl}/user/workers`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      signal: controller.signal,
+    })
+      .then((res) => {
+        setWorkers(res.data);
       })
-        .then((res) => {
-          setWorkers(res.data);
-        })
-        .catch((err) => {
-          if (err.response && err.response.data) {
-            Alert(
-              "Error",
-              err.response.data?.message || JSON.stringify(err.response.data)
-            );
-          } else if (err.request) {
-            Alert(
-              "Network Error",
-              "Unable to reach the server. Please check your connection."
-            );
-          } else {
-            Alert("Error", "Something went wrong. Please try again later.");
-          }
-        });
-    }
-  }, [apiUrl, token]);
-  const keyExtractor = useCallback((item) => item.id.toString(), []);
+      .catch(handleError);
+    return () => controller.abort();
+  }, [token]);
+
+  const handleError = useCallback((err) => {
+    if (err.response && err.response.data)
+      Alert(
+        "Error",
+        err.response.data?.message || JSON.stringify(err.response.data)
+      );
+    else if (err.request)
+      Alert(
+        "Network Error",
+        "Unable to reach the server. Please check your connection."
+      );
+    else Alert("Error", "Something went wrong. Please try again later.");
+  }, []);
   const handlePress = useCallback(
     (id, name, job, rating) => {
       router.push({
@@ -126,45 +110,38 @@ export default function Index() {
     },
     [router]
   );
-  const applyFilter = useCallback(() => {
-    let filtered = workers;
-    if (selectedChip) {
-      filtered = filtered.filter(
-        (worker) => worker.workerSpecialty === selectedChip
-      );
-    }
-    if (currentRegion) {
-      filtered = filtered.filter((worker) => worker.region === currentRegion);
-    }
-    setFilteredWorkers(filtered);
-  }, [currentRegion, selectedChip, workers]);
+  const keyExtractor = useCallback((item) => item.id.toString(), []);
+
+  const filteredWorkers = useMemo(() => {
+    if (!selectedChip && !currentRegion) return workers;
+    return workers.filter(
+      (worker) =>
+        (!selectedChip || worker.workerSpecialty === selectedChip) &&
+        (!currentRegion || worker.region === currentRegion)
+    );
+  }, [workers, selectedChip, currentRegion]);
   const renderItem = useCallback(
     ({ item }) => {
+      const pressHandler = () => {
+        handlePress(
+          item.id,
+          item.name,
+          item.workerSpecialty,
+          item.averageRating
+        );
+      };
       return (
         <WorkerCard
           key={item.id}
           id={item.id}
-          name={item.name}
-          speciality={item.workerSpecialty}
-          availability={item.isAvailable}
-          rating={item.averageRating}
-          region={item.region}
-          onPress={() =>
-            handlePress(
-              item.id,
-              item.name,
-              item.workerSpecialty,
-              item.averageRating
-            )
-          }
+          {...item}
+          onPress={pressHandler}
         />
       );
     },
     [handlePress]
   );
-  useEffect(() => {
-    applyFilter();
-  }, [applyFilter]);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.topStyle}>
@@ -255,26 +232,31 @@ export default function Index() {
           </View>
 
           {Platform.OS === "web" ? (
-            <ScrollView style={{ height: "60vh" }}>
-              <FlatList
-                style={styles.workerCardContainer}
-                renderItem={renderItem}
-                data={filterdWorkers}
-                scrollEnabled={false}
-                showsVerticalScrollIndicator={true}
-              />
-            </ScrollView>
+            <FlatList
+              keyExtractor={keyExtractor}
+              style={styles.workerCardContainer}
+              contentContainerStyle={{ height: "60vh" }}
+              renderItem={renderItem}
+              data={filteredWorkers}
+              scrollEnabled={true}
+              showsVerticalScrollIndicator={true}
+              initialNumToRender={8}
+              ListFooterComponent={<View style={{ height: 50 }} />}
+            />
           ) : (
             <Animated.FlatList
               keyExtractor={keyExtractor}
               itemLayoutAnimation={LinearTransition}
               style={styles.workerCardContainer}
               renderItem={renderItem}
-              data={filterdWorkers}
+              data={filteredWorkers}
               showsVerticalScrollIndicator={false}
               initialNumToRender={8}
               windowSize={5}
               removeClippedSubviews={true}
+              maxToRenderPerBatch={8}
+              updateCellsBatchingPeriod={50}
+              ListFooterComponent={<View style={{ height: 50 }} />}
             />
           )}
         </View>

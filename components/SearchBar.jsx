@@ -38,7 +38,7 @@ export default function SearchBar() {
   });
   const iconFlip = animation.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: ["0deg", "90deg", "180deg"],
+    outputRange: ["180deg", "90deg", "0deg"],
   });
 
   return (

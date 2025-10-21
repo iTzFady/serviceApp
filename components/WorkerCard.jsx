@@ -2,24 +2,31 @@ import { Regions } from "@/data/regions";
 import { fonts } from "@/theme/fonts";
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { Speciality } from "../data/speciality";
 import Avaliablity from "./avaliablilty";
 import Button from "./Button";
 import DynamicIcon from "./DynamicIcon";
 const profilePic = require("../assets/images/default-profile.png");
+
 function WorkerCard({
   id,
   name,
-  speciality,
-  availability,
-  rating,
+  workerSpecialty,
+  isAvailable,
+  averageRating,
   region,
   onPress,
 }) {
-  const work = Speciality.find((w) => w.value === speciality);
-  const workerRegion = Regions.find((w) => w.value === region);
+  const work = useMemo(
+    () => Speciality.find((w) => w.value === workerSpecialty),
+    [workerSpecialty]
+  );
+  const workerRegion = useMemo(
+    () => Regions.find((w) => w.value === region),
+    [region]
+  );
   return (
     <View style={styles.cardContainer}>
       <View style={styles.workerDataContainer}>
@@ -45,9 +52,9 @@ function WorkerCard({
               style={{ position: "absolute" }}
             />
           </View>
-          <Text style={styles.ratingText}>{rating}</Text>
+          <Text style={styles.ratingText}>{averageRating}</Text>
         </View>
-        <Avaliablity isAvaliable={availability} style={styles.availability} />
+        <Avaliablity isAvaliable={isAvailable} style={styles.availability} />
       </View>
       <View style={styles.category}>
         <Text style={styles.categoryText}>{work?.label}</Text>
@@ -103,6 +110,8 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     backgroundColor: "rgba(255, 255, 255, 1)",
     borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,1)",
     elevation: 4,
     shadowColor: "#000",
     shadowOpacity: 0.25,

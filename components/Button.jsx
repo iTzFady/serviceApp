@@ -1,7 +1,8 @@
 import { fonts } from "@/theme/fonts";
+import { memo } from "react";
 import { ActivityIndicator, Pressable, Text } from "react-native";
 import { Shadow } from "react-native-shadow-2";
-export default function Button({
+function Button({
   text,
   color,
   backgroundColor,
@@ -31,6 +32,7 @@ export default function Button({
           },
           style,
         ]}
+        disabled={loading}
         onPress={onPressEvent}
       >
         {loading ? (
@@ -55,3 +57,4 @@ export default function Button({
     </Shadow>
   );
 }
+export default memo(Button);

@@ -28,6 +28,7 @@ export default function LoginPage() {
   const { updateUser } = useUser();
   const [showPassword, setShowPassword] = useState(true);
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
+  const [loading, setLoading] = useState(false);
   const {
     control,
     handleSubmit,
@@ -39,15 +40,16 @@ export default function LoginPage() {
     },
   });
   const onSubmit = async (data) => {
+    setLoading(true);
     await axios({
       method: "post",
       url: `${apiUrl}/user/login`,
       data: data,
     })
-      .then((res) => {
+      .then(async (res) => {
         try {
           if (res.data.token && res.data.code === "LOGIN_SUCCESSFUL") {
-            AsyncStorage.setItem("userToken", res.data.token);
+            await AsyncStorage.setItem("userToken", res.data.token);
             updateUser(res.data.user);
             router.replace("/");
           }
@@ -69,7 +71,8 @@ export default function LoginPage() {
         } else {
           Alert("Error", "Something went wrong. Please try again later.");
         }
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -152,6 +155,7 @@ export default function LoginPage() {
               backgroundColor="rgba(127,186,78,1)"
               fontSize={24}
               onPressEvent={handleSubmit(onSubmit)}
+              loading={loading}
             />
           </View>
 

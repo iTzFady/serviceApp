@@ -35,16 +35,12 @@ export default function IntroScreen() {
       const hasSeenIntro = await AsyncStorage.getItem("hasSeenIntro");
       if (hasSeenIntro) {
         setShowApp(true);
+        router.replace("/login");
       }
       setLoading(false);
     };
     checkIntro();
   }, []);
-  useEffect(() => {
-    if (showApp) {
-      router.replace("/login");
-    }
-  }, [showApp, router]);
 
   if (loading) {
     return (
@@ -64,8 +60,8 @@ export default function IntroScreen() {
     );
   }
   const finishIntro = async (route) => {
-    await AsyncStorage.setItem("hasSeenIntro", "true");
     router.replace(route);
+    await AsyncStorage.setItem("hasSeenIntro", "true");
   };
   const createSlider = ({ item }) => {
     return (
@@ -164,7 +160,7 @@ export default function IntroScreen() {
           </TouchableOpacity>
         )}
       </View>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView>
         <AppIntroSlider
           ref={sliderRef}
           data={slides}
