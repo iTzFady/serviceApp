@@ -3,11 +3,12 @@ import RequestCard from "@/components/RequestCard";
 import RequestMedal from "@/components/RequestModal";
 import Switch from "@/components/Switch";
 import UserMedal from "@/components/UserMedal";
+import { useRequestsHub } from "@/context/RequestsHubContext";
 import { ThemeContext } from "@/context/ThemeContext";
+import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
 import { formatTime } from "@/utility/formatTime";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useRouter } from "expo-router";
 import { useCallback, useContext, useEffect, useState } from "react";
@@ -23,22 +24,19 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function Request() {
   const { user, updateUser } = useUser();
+  const { token, setToken } = useToken();
+  const { events } = useRequestsHub();
   const [online, setOnline] = useState(user?.isAvailable);
   const [requests, setRequests] = useState([]);
   const [showMedal, setShowMedal] = useState(false);
   const [showUserMedal, setShowUserMedal] = useState(false);
-  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
+  const { colorScheme } = useContext(ThemeContext);
   const [selectedRequest, setSelectedRequest] = useState(null);
-  const [token, setToken] = useState(null);
   const router = useRouter();
   useEffect(() => {
     const checkToken = async () => {
-      const storedToken = await AsyncStorage.getItem("userToken");
-      if (!storedToken) {
-        router.replace("/login");
-      } else {
-        setToken(storedToken.trim());
-      }
+      if (!token) router.replace("/login");
+      else setToken(token.trim());
     };
     checkToken();
   }, [router]);
@@ -53,7 +51,7 @@ export default function Request() {
     const fetchRequests = async () => {
       try {
         axios
-          .get(`${apiUrl}/requests/worker/${user?.id}`, {
+          .get(`${apiUrl}/api/requests/worker/${user?.id}`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -71,6 +69,19 @@ export default function Request() {
     };
     fetchRequests();
   }, [token, user?.id, user?.role]);
+
+  useEffect(() => {
+    try {
+      if (!events.length) return;
+      const latest = events[events.length - 1];
+      if (latest.type === "NewRequest") {
+        setRequests((prev) => [...prev, latest?.data]);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }, [events]);
+
   const renderItems = useCallback(({ item }) => {
     return (
       <RequestCard
@@ -115,7 +126,7 @@ export default function Request() {
                   toggleState={(value) => {
                     axios({
                       method: "put",
-                      url: `${apiUrl}/user/availability`,
+                      url: `${apiUrl}/api/user/availability`,
                       data: value,
                       headers: {
                         Authorization: `Bearer ${token}`,

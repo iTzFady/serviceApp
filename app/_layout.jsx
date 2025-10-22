@@ -1,4 +1,6 @@
+import { RequestsHubProvider } from "@/context/RequestsHubContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { TokenProvider, useToken } from "@/context/TokenContext";
 import { UserProvider } from "@/context/UserContext";
 import {
   Cairo_200ExtraLight,
@@ -14,9 +16,12 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function AppProviders() {
+  const { token, loading } = useToken();
+
   const [loaded, error] = useFonts({
     Cairo_200ExtraLight,
     Cairo_300Light,
@@ -25,39 +30,51 @@ export default function RootLayout() {
     Cairo_600SemiBold,
     Cairo_700Bold,
   });
+
   useEffect(() => {
     if (loaded || error) {
       SplashScreen.hideAsync();
     }
   }, [loaded, error]);
 
-  if (!loaded && !error) {
+  if ((!loaded && !error) || loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color="#00aaff" />
       </View>
     );
   }
+
   return (
-    <UserProvider>
-      <ThemeProvider>
-        <SafeAreaProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              animation: "fade",
-              contentStyle: { backgroundColor: "#Bde3e4" },
-            }}
-          >
-            <Stack.Screen name="intro" />
-            <Stack.Screen name="login" />
-            <Stack.Screen name="register" />
-            <Stack.Screen name="index" />
-            <Stack.Screen name="requestWorker/[id]" />
-            <Stack.Screen name="requests" />
-          </Stack>
-        </SafeAreaProvider>
-      </ThemeProvider>
-    </UserProvider>
+    <RequestsHubProvider token={token}>
+      <UserProvider>
+        <ThemeProvider>
+          <SafeAreaProvider>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                animation: "fade",
+                contentStyle: { backgroundColor: "#Bde3e4" },
+              }}
+            >
+              <Stack.Screen name="intro" />
+              <Stack.Screen name="login" />
+              <Stack.Screen name="register" />
+              <Stack.Screen name="index" />
+              <Stack.Screen name="requestWorker/[id]" />
+              <Stack.Screen name="requests" />
+            </Stack>
+          </SafeAreaProvider>
+        </ThemeProvider>
+      </UserProvider>
+    </RequestsHubProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <TokenProvider>
+      <AppProviders />
+    </TokenProvider>
   );
 }

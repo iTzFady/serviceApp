@@ -68,7 +68,7 @@ export default function RegisterPage() {
     setLoading(true);
     await axios({
       method: "post",
-      url: `${apiUrl}/user/register`,
+      url: `${apiUrl}/api/user/register`,
       data: {
         Name: payload.name,
         Role: payload.Role,

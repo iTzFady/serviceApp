@@ -2,11 +2,11 @@ import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import InputField from "@/components/InputField";
 import { ThemeContext } from "@/context/ThemeContext";
+import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
 import { fonts } from "@/theme/fonts";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Link, useRouter } from "expo-router";
 import { useContext, useState } from "react";
@@ -25,6 +25,7 @@ const logo = require("../assets/images/logo.png");
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 export default function LoginPage() {
   const router = useRouter();
+  const { setToken } = useToken();
   const { updateUser } = useUser();
   const [showPassword, setShowPassword] = useState(true);
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
@@ -43,13 +44,13 @@ export default function LoginPage() {
     setLoading(true);
     await axios({
       method: "post",
-      url: `${apiUrl}/user/login`,
+      url: `${apiUrl}/api/user/login`,
       data: data,
     })
       .then(async (res) => {
         try {
           if (res.data.token && res.data.code === "LOGIN_SUCCESSFUL") {
-            await AsyncStorage.setItem("userToken", res.data.token);
+            await setToken(res.data.token);
             updateUser(res.data.user);
             router.replace("/");
           }

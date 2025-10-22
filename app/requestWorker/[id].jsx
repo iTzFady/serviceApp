@@ -5,16 +5,16 @@ import InputField from "@/components/InputField";
 import Separator from "@/components/Separator";
 import UploadButton from "@/components/UploadImageButton";
 import { ThemeContext } from "@/context/ThemeContext";
+import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
 import { Speciality } from "@/data/speciality";
 import { fonts } from "@/theme/fonts";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Image,
@@ -34,18 +34,16 @@ const profilePic = require("@/assets/images/default-profile.png");
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function RequestWorker() {
-  const { user, updateUser } = useUser();
+  const { user } = useUser();
+  const { token } = useToken();
   const [loading, setLoading] = useState(false);
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
-  const [token, setToken] = useState(null);
-  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
+  const { colorScheme } = useContext(ThemeContext);
   const {
     control,
     handleSubmit,
     formState: { errors },
-    reset,
-    setValue,
   } = useForm({
     mode: "onBlur",
     defaultValues: {
@@ -61,17 +59,6 @@ export default function RequestWorker() {
   const { id, name, job, rating } = useLocalSearchParams();
   const work = Speciality.find((w) => w.value === job);
   const router = useRouter();
-  useEffect(() => {
-    const checkToken = async () => {
-      const storedToken = await AsyncStorage.getItem("userToken");
-      if (!storedToken) {
-        router.replace("/login");
-      } else {
-        setToken(storedToken.trim());
-      }
-    };
-    checkToken();
-  }, [router]);
 
   const onSubmit = (data) => {
     setLoading(true);
@@ -86,7 +73,7 @@ export default function RequestWorker() {
     formData.append("notes", data.notes);
     formData.append("images", data.image);
     axios({
-      url: `${apiUrl}/requests`,
+      url: `${apiUrl}/api/requests`,
       method: "post",
       data: formData,
       timeout: 5000,

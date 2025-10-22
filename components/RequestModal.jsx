@@ -59,7 +59,7 @@ export default function RequestModal({
 
     axios({
       method: decision === "reject" ? "delete" : "put",
-      url: `${apiUrl}/requests/${request.id}/${
+      url: `${apiUrl}/api/requests/${request.id}/${
         decision === "reject" ? "reject" : "accept"
       }`,
       timeout: 15000,
@@ -151,7 +151,7 @@ export default function RequestModal({
               resizeMode="contain"
               style={styles.requestImage}
               source={{
-                uri: `https://localhost:7032${request.imageUrls[0]}`,
+                uri: `${apiUrl}${request.imageUrls[0]}`,
               }}
             />
           )}

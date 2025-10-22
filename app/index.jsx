@@ -5,11 +5,12 @@ import SpecialityChip from "@/components/specialityChip.jsx";
 import UserMedal from "@/components/UserMedal";
 import WebSelect from "@/components/WebSelect";
 import WorkerCard from "@/components/WorkerCard";
+import { useRequestsHub } from "@/context/RequestsHubContext";
 import { ThemeContext } from "@/context/ThemeContext";
+import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
 import { fonts } from "@/theme/fonts";
 import { Entypo, FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useRouter } from "expo-router";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -33,31 +34,31 @@ import { Speciality } from "../data/speciality";
 const logo = require("../assets/images/logo.png");
 export default function Index() {
   const { user, updateUser } = useUser();
+  const { token, setToken } = useToken();
+  const { events } = useRequestsHub();
+  const { colorScheme } = useContext(ThemeContext);
+
   const [selectedChip, setSelectedChip] = useState(null);
   const [currentRegion, setCurrentRegion] = useState(null);
   const [workers, setWorkers] = useState([]);
   const [lastRequest, setLastRequest] = useState(null);
   const [currentUser, setCurrentUser] = useState(user?.name);
-  const [token, setToken] = useState(null);
   const [showUserMedal, setShowUserMedal] = useState(false);
-  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
   const router = useRouter();
-  const loadToken = useCallback(async () => {
-    const storedToken = await AsyncStorage.getItem("userToken");
-    if (!storedToken) router.replace("/login");
-    else setToken(storedToken.trim());
-  }, [router]);
   useEffect(() => {
-    loadToken();
-  }, [loadToken]);
-
+    const checkToken = async () => {
+      if (!token) router.replace("/login");
+      else setToken(token.trim());
+    };
+    checkToken();
+  }, [router]);
   useEffect(() => {
     if (!token) return;
     const controller = new AbortController();
     axios({
       method: "get",
-      url: `${apiUrl}/user/me`,
+      url: `${apiUrl}/api/user/me`,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -76,7 +77,7 @@ export default function Index() {
     const controller = new AbortController();
     axios({
       method: "get",
-      url: `${apiUrl}/user/workers`,
+      url: `${apiUrl}/api/user/workers`,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -88,25 +89,40 @@ export default function Index() {
       .catch(handleError);
     return () => controller.abort();
   }, [token]);
+
   useEffect(() => {
     if (!token) return;
-    const controller = new AbortController();
-    axios({
-      method: "get",
-      url: `${apiUrl}/requests/me/last`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      signal: controller.signal,
-    })
+    axios
+      .get(`${apiUrl}/api/requests/me/last`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => {
-        if (res.data.code) {
-          setLastRequest(res.data.data);
-        }
+        if (res.data) setLastRequest(res.data);
       })
       .catch(() => {});
-    return () => controller.abort();
   }, [token]);
+
+  useEffect(() => {
+    if (!events.length) return;
+    const latest = events[events.length - 1];
+    switch (latest.type) {
+      case "Accepted":
+        setLastRequest((prev) => ({ ...prev, status: "Accepted" }));
+        break;
+      case "Completed":
+        setLastRequest(null);
+        break;
+      case "Cancelled":
+        setLastRequest(null);
+        break;
+      case "Rejected":
+        setLastRequest(null);
+        break;
+      default:
+        break;
+    }
+  }, [events]);
+
   const handleError = useCallback((err) => {
     if (err.response && err.response.data)
       Alert(

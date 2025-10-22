@@ -1,3 +1,4 @@
+import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
 import { fonts } from "@/theme/fonts";
 import {
@@ -6,7 +7,6 @@ import {
   MaterialIcons,
   Octicons,
 } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
 import {
@@ -29,6 +29,7 @@ const { width, height } = Dimensions.get("window");
 export default function RequestModal({ show, setShow, userType = "worker" }) {
   const slideAnim = useRef(new Animated.Value(width)).current;
   const { user, updateUser } = useUser();
+  const { removeToken } = useToken();
   useEffect(() => {
     if (show) {
       Animated.timing(slideAnim, {
@@ -79,7 +80,7 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
   }, [slideAnim, setShow]);
   const handleLogout = useCallback(async () => {
     try {
-      await AsyncStorage.removeItem("userToken");
+      await removeToken("userToken");
       updateUser(null);
     } catch (err) {
       AlertMessage("Error", err);
