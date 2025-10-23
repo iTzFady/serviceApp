@@ -1,8 +1,8 @@
-import Alert from "@/components/Alert";
+import { default as Alert, default as AlertMessage } from "@/components/Alert";
 import MiniRequest from "@/components/MiniRequest";
 import SearchBar from "@/components/SearchBar";
 import SpecialityChip from "@/components/specialityChip.jsx";
-import UserMedal from "@/components/UserMedal";
+import UserModal from "@/components/UserModal";
 import WebSelect from "@/components/WebSelect";
 import WorkerCard from "@/components/WorkerCard";
 import { useRequestsHub } from "@/context/RequestsHubContext";
@@ -34,16 +34,15 @@ import { Speciality } from "../data/speciality";
 const logo = require("../assets/images/logo.png");
 export default function Index() {
   const { user, updateUser } = useUser();
-  const { token, setToken } = useToken();
+  const { token, setToken, removeToken } = useToken();
   const { events } = useRequestsHub();
   const { colorScheme } = useContext(ThemeContext);
-
   const [selectedChip, setSelectedChip] = useState(null);
   const [currentRegion, setCurrentRegion] = useState(null);
   const [workers, setWorkers] = useState([]);
-  const [lastRequest, setLastRequest] = useState(null);
+  const [requests, setRequests] = useState([]);
   const [currentUser, setCurrentUser] = useState(user?.name);
-  const [showUserMedal, setShowUserMedal] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
   const router = useRouter();
   useEffect(() => {
@@ -93,37 +92,55 @@ export default function Index() {
   useEffect(() => {
     if (!token) return;
     axios
-      .get(`${apiUrl}/api/requests/me/last`, {
+      .get(`${apiUrl}/api/requests/getClientRequests`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        if (res.data) setLastRequest(res.data);
+        if (res.data) setRequests(res.data);
       })
       .catch(() => {});
   }, [token]);
 
   useEffect(() => {
     if (!events.length) return;
+
     const latest = events[events.length - 1];
-    switch (latest.type) {
-      case "Accepted":
-        setLastRequest((prev) => ({ ...prev, status: "Accepted" }));
-        break;
-      case "Completed":
-        setLastRequest(null);
-        break;
-      case "Cancelled":
-        setLastRequest(null);
-        break;
-      case "Rejected":
-        setLastRequest(null);
-        break;
-      default:
-        break;
-    }
+    setRequests((prevRequests) => {
+      if (!prevRequests || prevRequests.length === 0) return prevRequests;
+
+      switch (latest.type) {
+        case "Accepted": {
+          return prevRequests.map((req) =>
+            req.id === latest.data.requestId
+              ? { ...req, status: "Accepted" }
+              : req
+          );
+        }
+
+        case "Rejected": {
+          return prevRequests.filter((req) => req.id !== latest.data.requestId);
+        }
+
+        case "Cancelled":
+        case "Completed": {
+          return prevRequests.filter((req) => req.id !== latest.data.requestId);
+        }
+
+        default:
+          return prevRequests;
+      }
+    });
   }, [events]);
 
   const handleError = useCallback((err) => {
+    if (err.status === 401) {
+      AlertMessage(
+        "Session Expired",
+        "You must re-login because session ended"
+      );
+      removeToken();
+      router.replace();
+    }
     if (err.response && err.response.data)
       Alert(
         "Error",
@@ -181,8 +198,8 @@ export default function Index() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.topStyle}>
         <TouchableOpacity
-          style={styles.medalButton}
-          onPress={() => setShowUserMedal(true)}
+          style={styles.modalButton}
+          onPress={() => setShowUserModal(true)}
         >
           <MaterialIcons
             name="settings"
@@ -191,12 +208,15 @@ export default function Index() {
           />
         </TouchableOpacity>
         <Image style={styles.logo} source={logo} resizeMode="contain" />
-        <TouchableOpacity
-          style={styles.settingsButton}
-          onPress={() => router.push("/requests")}
-        >
-          <FontAwesome name="sliders" size={24} color="rgba(51, 109, 3, 1)" />
-        </TouchableOpacity>
+
+        {user?.role === "Worker" ? (
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={() => router.push("/workerRequests")}
+          >
+            <FontAwesome name="sliders" size={24} color="rgba(51, 109, 3, 1)" />
+          </TouchableOpacity>
+        ) : null}
       </View>
       <View style={styles.container}>
         <Text style={styles.welcomeText}>مرحبا، {currentUser}</Text>
@@ -270,7 +290,7 @@ export default function Index() {
             />
           </View>
         )}
-        {lastRequest ? (
+        {requests.length > 0 ? (
           <View style={styles.workerCategory}>
             <View style={styles.category}>
               <Text style={styles.categoryRightText}>
@@ -278,16 +298,16 @@ export default function Index() {
               </Text>
               <TouchableOpacity
                 style={{ width: "50%" }}
-                onPress={() => console.log("Hello World")}
+                onPress={() => router.push("/clientRequests")}
               >
                 <Text style={styles.categoryLeftText}>عرض كل الطلبات</Text>
               </TouchableOpacity>
             </View>
             <MiniRequest
-              name={lastRequest.requestedFor.name}
-              rating={lastRequest.requestedFor.rating}
-              status={lastRequest.status}
-              phoneNumber={lastRequest.requestedFor.phoneNumber}
+              name={requests.at(-1).requestedFor.name}
+              rating={requests.at(-1).requestedFor.rating}
+              status={requests.at(-1).status}
+              phoneNumber={requests.at(-1).requestedFor.phoneNumber}
             />
           </View>
         ) : null}
@@ -325,7 +345,7 @@ export default function Index() {
           )}
         </View>
       </View>
-      <UserMedal show={showUserMedal} setShow={setShowUserMedal} />
+      <UserModal show={showUserModal} setShow={setShowUserModal} />
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </SafeAreaView>
   );
@@ -348,7 +368,7 @@ const styles = StyleSheet.create({
     left: 5,
     marginLeft: 20,
   },
-  medalButton: {
+  modalButton: {
     position: "absolute",
     right: 5,
     marginRight: 20,

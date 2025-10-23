@@ -1,8 +1,8 @@
 import { default as Alert, default as AlertMessage } from "@/components/Alert";
 import RequestCard from "@/components/RequestCard";
-import RequestMedal from "@/components/RequestModal";
+import RequestModal from "@/components/RequestModal";
 import Switch from "@/components/Switch";
-import UserMedal from "@/components/UserMedal";
+import UserModal from "@/components/UserModal";
 import { useRequestsHub } from "@/context/RequestsHubContext";
 import { ThemeContext } from "@/context/ThemeContext";
 import { useToken } from "@/context/TokenContext";
@@ -28,8 +28,8 @@ export default function Request() {
   const { events } = useRequestsHub();
   const [online, setOnline] = useState(user?.isAvailable);
   const [requests, setRequests] = useState([]);
-  const [showMedal, setShowMedal] = useState(false);
-  const [showUserMedal, setShowUserMedal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
   const { colorScheme } = useContext(ThemeContext);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const router = useRouter();
@@ -51,7 +51,7 @@ export default function Request() {
     const fetchRequests = async () => {
       try {
         axios
-          .get(`${apiUrl}/api/requests/worker/${user?.id}`, {
+          .get(`${apiUrl}/api/requests/getWorkerRequests`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -92,7 +92,7 @@ export default function Request() {
         dateTime={formatTime(item.dateTime)}
         status={item.status}
         onPress={() => {
-          setShowMedal(!showMedal);
+          setShowModal(!showModal);
           setSelectedRequest(item);
         }}
       />
@@ -166,7 +166,7 @@ export default function Request() {
 
             <TouchableOpacity
               style={styles.topButton}
-              onPress={() => setShowUserMedal(true)}
+              onPress={() => setShowUserModal(true)}
             >
               <MaterialIcons name="settings" size={25} color="black" />
             </TouchableOpacity>
@@ -205,16 +205,17 @@ export default function Request() {
           />
         )}
       </View>
-      <RequestMedal
+      <RequestModal
         request={selectedRequest}
-        show={showMedal}
-        setShow={setShowMedal}
+        show={showModal}
+        setShow={setShowModal}
         url={apiUrl}
         token={token}
+        userType="Worker"
         acceptRequest={AcceptRequest}
         removeRequest={removeItem}
       />
-      <UserMedal show={showUserMedal} setShow={setShowUserMedal} />
+      <UserModal show={showUserModal} setShow={setShowUserModal} />
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </View>
   );
@@ -222,14 +223,12 @@ export default function Request() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#Bde3e4",
   },
   topStyle: {
     flexDirection: "column",
     alignItems: "center",
     alignContent: "center",
     height: 100,
-    backgroundColor: "#Bde3e4",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,

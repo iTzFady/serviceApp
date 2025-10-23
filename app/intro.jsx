@@ -47,7 +47,6 @@ export default function IntroScreen() {
       <View
         style={{
           flex: 1,
-          backgroundColor: "#Bde3e4",
           justifyContent: "center",
           alignItems: "center",
         }}
@@ -179,7 +178,6 @@ export default function IntroScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#Bde3e4",
   },
   topStyle: {
     flexDirection: "row-reverse",

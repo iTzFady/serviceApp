@@ -62,7 +62,7 @@ function AppProviders() {
               <Stack.Screen name="register" />
               <Stack.Screen name="index" />
               <Stack.Screen name="requestWorker/[id]" />
-              <Stack.Screen name="requests" />
+              <Stack.Screen name="workerRequests" />
             </Stack>
           </SafeAreaProvider>
         </ThemeProvider>

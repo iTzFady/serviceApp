@@ -18,7 +18,6 @@ import {
   View,
 } from "react-native";
 import Alert from "./Alert";
-
 const profilePic = require("@/assets/images/default-profile.png");
 const screenHeight = Dimensions.get("window").height;
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -30,6 +29,8 @@ export default function RequestModal({
   token,
   removeRequest,
   acceptRequest,
+  userType,
+  handleContact,
 }) {
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
   const [visible, setVisible] = useState(show);
@@ -95,6 +96,7 @@ export default function RequestModal({
         setShow(false);
       });
   };
+
   return (
     <Modal
       transparent
@@ -114,7 +116,9 @@ export default function RequestModal({
           <View style={styles.clientInfo}>
             <Image style={styles.profilePicStyle} source={profilePic} />
             <Text style={styles.userDetailText}>
-              {request.requestedBy.name}
+              {userType === "Worker"
+                ? request.requestedBy.name
+                : request.requestedFor.name}
             </Text>
           </View>
           <View style={styles.ratingContainer}>
@@ -124,7 +128,9 @@ export default function RequestModal({
               color="rgba(237, 237, 14, 0.81)"
             />
             <Text style={[styles.userDetailText, { fontSize: 10 }]}>
-              {request.requestedBy.rating}
+              {userType === "Worker"
+                ? request.requestedBy.rating
+                : request.requestedFor.rating}
             </Text>
           </View>
 
@@ -156,41 +162,59 @@ export default function RequestModal({
             />
           )}
         </ScrollView>
-
         <View style={styles.buttonContainer}>
-          <Pressable
-            style={[styles.button, { backgroundColor: "rgba(2, 63, 65, 1)" }]}
-            onPress={() => handleRequest("accept")}
-            disabled={acceptLoading || rejectLoading}
-          >
-            {acceptLoading ? (
-              <ActivityIndicator
-                style={{ marginVertical: "auto", paddingVertical: "auto" }}
-                size="small"
-                color="#000"
-              />
-            ) : (
-              <Text style={styles.buttonText}>قبول</Text>
-            )}
-          </Pressable>
-          <Pressable
-            style={[
-              styles.button,
-              { backgroundColor: "rgba(255, 255, 255, 0.3)" },
-            ]}
-            onPress={() => handleRequest("reject")}
-            disabled={acceptLoading || rejectLoading}
-          >
-            {rejectLoading ? (
-              <ActivityIndicator
-                style={{ marginVertical: "auto", paddingVertical: "auto" }}
-                size="small"
-                color="#000"
-              />
-            ) : (
-              <Text style={styles.buttonText}>رفض</Text>
-            )}
-          </Pressable>
+          {userType === "Worker" ? (
+            <>
+              <Pressable
+                style={[
+                  styles.button,
+                  { backgroundColor: "rgba(2, 63, 65, 1)" },
+                ]}
+                onPress={() => handleRequest("accept")}
+                disabled={acceptLoading || rejectLoading}
+              >
+                {acceptLoading ? (
+                  <ActivityIndicator
+                    style={{ marginVertical: "auto", paddingVertical: "auto" }}
+                    size="small"
+                    color="#000"
+                  />
+                ) : (
+                  <Text style={styles.buttonText}>قبول</Text>
+                )}
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.button,
+                  { backgroundColor: "rgba(255, 255, 255, 0.3)" },
+                ]}
+                onPress={() => handleRequest("reject")}
+                disabled={acceptLoading || rejectLoading}
+              >
+                {rejectLoading ? (
+                  <ActivityIndicator
+                    style={{ marginVertical: "auto", paddingVertical: "auto" }}
+                    size="small"
+                    color="#000"
+                  />
+                ) : (
+                  <Text style={styles.buttonText}>رفض</Text>
+                )}
+              </Pressable>
+            </>
+          ) : request.status === "Accepted" ? (
+            <>
+              <Pressable
+                style={[
+                  styles.button,
+                  { backgroundColor: "rgba(2, 63, 65, 1)" },
+                ]}
+                onPress={handleContact}
+              >
+                <Text style={styles.buttonText}>التواصل مع الصنايعي</Text>
+              </Pressable>
+            </>
+          ) : null}
         </View>
       </Animated.View>
     </Modal>
