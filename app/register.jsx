@@ -3,7 +3,9 @@ import Button from "@/components/Button";
 import DynamicIcon from "@/components/DynamicIcon";
 import InputField from "@/components/InputField";
 import Separator from "@/components/Separator";
+import UploadButton from "@/components/UploadImageButton";
 import WebSelect from "@/components/WebSelect";
+
 import { ThemeContext } from "@/context/ThemeContext";
 import { fonts } from "@/theme/fonts";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -65,20 +67,31 @@ export default function RegisterPage() {
         "Please ensure that both password fields match before continuing."
       );
     }
+    const formData = new FormData();
+    formData.append("profilePic", payload.image);
+    formData.append("Name", payload.name);
+    formData.append("Role", payload.Role);
+    formData.append("Email", payload.email);
+    formData.append("Password", payload.password);
+    formData.append("PhoneNumber", payload.phoneNumber);
+    formData.append(
+      "NationalNumber",
+      payload.NationalNumber ? payload.NationalNumber : null
+    );
+    formData.append("Region", payload.region ? payload.region : null);
+    formData.append(
+      "WorkerSpecialty",
+      payload.speciality ? payload.speciality : null
+    );
     setLoading(true);
     await axios({
       method: "post",
       url: `${apiUrl}/api/user/register`,
-      data: {
-        Name: payload.name,
-        Role: payload.Role,
-        Email: payload.email,
-        Password: payload.password,
-        PhoneNumber: payload.phoneNumber,
-        NationalNumber: payload.NationalNumber ? payload.NationalNumber : null,
-        Region: payload.region ? payload.region : null,
-        WorkerSpecialty: payload.speciality ? payload.speciality : null,
+      timeout: 25000,
+      headers: {
+        "Content-Type": "multipart/form-data",
       },
+      data: formData,
     })
       .then((res) => {
         if (res.data.code === "REGISTRATION_SUCCESSFUL") {
@@ -279,6 +292,19 @@ export default function RegisterPage() {
       >
         <ScrollView>
           <Text style={styles.title}>البيانات الشخصيه</Text>
+
+          <Controller
+            control={control}
+            name="image"
+            render={({ field: { onChange, value } }) => (
+              <UploadButton
+                onChange={onChange}
+                value={value}
+                type="ProfilePic"
+              />
+            )}
+          />
+
           <Controller
             control={control}
             name="name"

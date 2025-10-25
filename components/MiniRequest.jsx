@@ -8,7 +8,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-const profilePic = require("@/assets/images/default-profile.png");
+const defaultProfilePic = require("@/assets/images/default-profile.png");
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
 export default function MiniRequest({
   name,
   profilePicUrl,
@@ -38,7 +40,14 @@ export default function MiniRequest({
     <View style={styles.container}>
       <View style={styles.requestInfo}>
         <View style={styles.clientDetails}>
-          <Image style={styles.profilePicStyle} source={profilePic} />
+          <Image
+            style={styles.profilePicStyle}
+            source={
+              profilePicUrl
+                ? { uri: `${apiUrl}${profilePicUrl}` }
+                : defaultProfilePic
+            }
+          />
           <Text style={styles.userDetailText}>{name}</Text>
 
           <View style={styles.ratingContainer}>
@@ -133,6 +142,8 @@ const styles = StyleSheet.create({
   profilePicStyle: {
     width: 20,
     height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
   },
   requestInfo: {
     backgroundColor: "white",

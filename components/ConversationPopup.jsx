@@ -1,12 +1,29 @@
 import { fonts } from "@/theme/fonts";
 import { FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons/";
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { useCallback } from "react";
+import {
+  Linking,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-export default function ConversationPopup({ show }) {
+export default function ConversationPopup({ show, setShow, phoneNumber }) {
+  const openDialer = useCallback(() => {
+    Linking.canOpenURL(`tel:${phoneNumber}`).then((supported) => {
+      if (supported) {
+        Linking.openURL(`tel:${phoneNumber}`);
+      } else {
+        console.log("Dialer not supported on this device");
+      }
+    });
+  }, [phoneNumber]);
   return (
     <SafeAreaView>
       <Modal visible={show} transparent={true} animationType="fade">
-        <View style={styles.container}>
+        <Pressable onPress={() => setShow(!show)} style={styles.container}>
           <View style={styles.buttonContainer}>
             <Pressable style={[styles.button, { backgroundColor: "#fff" }]}>
               <MaterialCommunityIcons
@@ -21,17 +38,18 @@ export default function ConversationPopup({ show }) {
                 styles.button,
                 { backgroundColor: "rgba(127, 186, 78, 1)" },
               ]}
+              onPress={openDialer}
             >
               <FontAwesome6
                 name="phone"
                 size={16}
                 color="rgba(137, 240, 51, 0.89)"
               />
-              <Text style={styles.buttonText}>01285125478</Text>
+              <Text style={styles.buttonText}>{phoneNumber}</Text>
             </Pressable>
             <Text style={styles.footerText}>رقم العميل يحب التواصل معاه</Text>
           </View>
-        </View>
+        </Pressable>
       </Modal>
     </SafeAreaView>
   );
@@ -42,11 +60,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
     alignItems: "center",
+    position: "relative",
   },
   buttonContainer: {
     width: "65%",
     alignItems: "center",
-    marginBottom: 50,
+    position: "absolute",
+    bottom: 80,
   },
   button: {
     flexDirection: "row",

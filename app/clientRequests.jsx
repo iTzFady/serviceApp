@@ -66,6 +66,32 @@ export default function Request() {
     };
     fetchRequests();
   }, [token, user?.id, user?.role]);
+  useEffect(() => {
+    if (!events.length) return;
+
+    const latest = events[events.length - 1];
+    setRequests((prevRequests) => {
+      if (!prevRequests || prevRequests.length === 0) return prevRequests;
+
+      switch (latest.type) {
+        case "Accepted": {
+          return prevRequests.map((req) =>
+            req.id === latest.data.requestId
+              ? { ...req, status: "Accepted" }
+              : req
+          );
+        }
+        case "Rejected":
+        case "Cancelled":
+        case "Completed": {
+          return prevRequests.filter((req) => req.id !== latest.data.requestId);
+        }
+
+        default:
+          return prevRequests;
+      }
+    });
+  }, [events]);
 
   const renderItems = useCallback(({ item }) => {
     return (
@@ -147,7 +173,11 @@ export default function Request() {
         userType="Client"
         handleContact={handleContactModal}
       />
-      <ConversationPopup show={showContactModal} />
+      <ConversationPopup
+        show={showContactModal}
+        setShow={setShowContactModal}
+        phoneNumber={selectedRequest?.requestedFor.phoneNumber}
+      />
       <UserModal show={showUserModal} setShow={setShowUserModal} />
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </View>

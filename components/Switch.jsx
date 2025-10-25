@@ -49,12 +49,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: "#000",
-    overflow: "hidden",
     justifyContent: "center",
   },
   inner: {
     width: 80,
-    height: "28",
+    height: 28,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",

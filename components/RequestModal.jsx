@@ -18,7 +18,7 @@ import {
   View,
 } from "react-native";
 import Alert from "./Alert";
-const profilePic = require("@/assets/images/default-profile.png");
+const defaultProfilePic = require("@/assets/images/default-profile.png");
 const screenHeight = Dimensions.get("window").height;
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -36,6 +36,7 @@ export default function RequestModal({
   const [visible, setVisible] = useState(show);
   const [acceptLoading, setAcceptLoading] = useState(false);
   const [rejectLoading, setRejectLoading] = useState(false);
+  console.log(request);
   useEffect(() => {
     if (show) {
       setVisible(true);
@@ -114,7 +115,14 @@ export default function RequestModal({
       >
         <View style={styles.clientDetails}>
           <View style={styles.clientInfo}>
-            <Image style={styles.profilePicStyle} source={profilePic} />
+            <Image
+              style={styles.profilePicStyle}
+              source={
+                request.requestedBy.profilePictureUrl
+                  ? { uri: `${apiUrl}${request.requestedBy.profilePictureUrl}` }
+                  : defaultProfilePic
+              }
+            />
             <Text style={styles.userDetailText}>
               {userType === "Worker"
                 ? request.requestedBy.name

@@ -67,6 +67,7 @@ export default function Index() {
         if (!currentUser && res.data.name) {
           setCurrentUser(res.data.name);
         }
+        console.log(user);
       })
       .catch(handleError);
     return () => controller.abort();
@@ -84,6 +85,7 @@ export default function Index() {
     })
       .then((res) => {
         setWorkers(res.data);
+        console.log(res.data);
       })
       .catch(handleError);
     return () => controller.abort();
@@ -91,19 +93,22 @@ export default function Index() {
 
   useEffect(() => {
     if (!token) return;
+    const controller = new AbortController();
+
     axios
       .get(`${apiUrl}/api/requests/getClientRequests`, {
         headers: { Authorization: `Bearer ${token}` },
+        signal: controller.signal,
       })
       .then((res) => {
         if (res.data) setRequests(res.data);
       })
       .catch(() => {});
+    return () => controller.abort();
   }, [token]);
 
   useEffect(() => {
     if (!events.length) return;
-
     const latest = events[events.length - 1];
     setRequests((prevRequests) => {
       if (!prevRequests || prevRequests.length === 0) return prevRequests;
@@ -116,16 +121,11 @@ export default function Index() {
               : req
           );
         }
-
-        case "Rejected": {
-          return prevRequests.filter((req) => req.id !== latest.data.requestId);
-        }
-
+        case "Rejected":
         case "Cancelled":
         case "Completed": {
           return prevRequests.filter((req) => req.id !== latest.data.requestId);
         }
-
         default:
           return prevRequests;
       }
@@ -154,10 +154,10 @@ export default function Index() {
     else Alert("Error", "Something went wrong. Please try again later.");
   }, []);
   const handlePress = useCallback(
-    (id, name, job, rating) => {
+    (id, name, job, rating, profilePicture) => {
       router.push({
         pathname: `/requestWorker/${id}`,
-        params: { name, job, rating },
+        params: { name, job, rating, profilePicture },
       });
     },
     [router]
@@ -179,7 +179,8 @@ export default function Index() {
           item.id,
           item.name,
           item.workerSpecialty,
-          item.averageRating
+          item.averageRating,
+          item.profilePictureUrl
         );
       };
       return (
@@ -304,10 +305,11 @@ export default function Index() {
               </TouchableOpacity>
             </View>
             <MiniRequest
-              name={requests.at(-1).requestedFor.name}
-              rating={requests.at(-1).requestedFor.rating}
-              status={requests.at(-1).status}
-              phoneNumber={requests.at(-1).requestedFor.phoneNumber}
+              name={requests.at(0).requestedFor.name}
+              rating={requests.at(0).requestedFor.rating}
+              status={requests.at(0).status}
+              phoneNumber={requests.at(0).requestedFor.phoneNumber}
+              profilePicUrl={requests.at(0).requestedFor.profilePictureUrl}
             />
           </View>
         ) : null}
@@ -340,7 +342,7 @@ export default function Index() {
               removeClippedSubviews={true}
               maxToRenderPerBatch={8}
               updateCellsBatchingPeriod={50}
-              ListFooterComponent={<View style={{ height: 50 }} />}
+              ListFooterComponent={<View style={{ height: 100 }} />}
             />
           )}
         </View>

@@ -30,7 +30,7 @@ import {
   View,
 } from "react-native";
 
-const profilePic = require("@/assets/images/default-profile.png");
+const defaultProfilePic = require("@/assets/images/default-profile.png");
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function RequestWorker() {
@@ -56,14 +56,14 @@ export default function RequestWorker() {
       notes: "",
     },
   });
-  const { id, name, job, rating } = useLocalSearchParams();
+  const { id, name, job, rating, profilePicture } = useLocalSearchParams();
   const work = Speciality.find((w) => w.value === job);
   const router = useRouter();
-
   const onSubmit = (data) => {
     setLoading(true);
     const formData = new FormData();
     const dateTime = `${data.date}T${data.time}:00`;
+    console.log(`${data.date}`);
     formData.append("requestedByUserId", user?.id);
     formData.append("RequestedForUserId", id);
     formData.append("title", data.type);
@@ -130,8 +130,12 @@ export default function RequestWorker() {
             <Image
               style={styles.workerImage}
               alt="Profile Picture"
-              resizeMode="contain"
-              source={profilePic}
+              resizeMode="cover"
+              source={
+                profilePicture
+                  ? { uri: `${apiUrl}${profilePicture}` }
+                  : defaultProfilePic
+              }
             />
             <Text style={styles.workerName}>{name}</Text>
           </View>
@@ -444,6 +448,7 @@ const styles = StyleSheet.create({
   workerImage: {
     width: 40,
     height: 40,
+    borderRadius: 20,
   },
   workerName: {
     fontSize: 12,

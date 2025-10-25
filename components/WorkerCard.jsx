@@ -8,7 +8,8 @@ import { Speciality } from "../data/speciality";
 import Avaliablity from "./avaliablilty";
 import Button from "./Button";
 import DynamicIcon from "./DynamicIcon";
-const profilePic = require("../assets/images/default-profile.png");
+const defaultProfilePic = require("../assets/images/default-profile.png");
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 function WorkerCard({
   id,
@@ -17,6 +18,7 @@ function WorkerCard({
   isAvailable,
   averageRating,
   region,
+  profilePictureUrl,
   onPress,
 }) {
   const work = useMemo(
@@ -33,8 +35,12 @@ function WorkerCard({
         <Image
           style={styles.image}
           alt="Profile Picture"
-          resizeMode="contain"
-          source={profilePic}
+          resizeMode="cover"
+          source={
+            profilePictureUrl
+              ? { uri: `${apiUrl}${profilePictureUrl}` }
+              : defaultProfilePic
+          }
         />
         <Text style={styles.workerName}>{name}</Text>
         <View style={styles.ratingContainer}>
@@ -121,6 +127,8 @@ const styles = StyleSheet.create({
   image: {
     width: 20,
     height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
   },
   workerDataContainer: {
     flexDirection: "row-reverse",

@@ -1,8 +1,10 @@
 import { fonts } from "@/theme/fonts";
+import { Entypo, Feather } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   Platform,
   Pressable,
   StyleSheet,
@@ -10,9 +12,11 @@ import {
   View,
 } from "react-native";
 import Alert from "./Alert";
+const defaultProfilePic = require("@/assets/images/default-profile.png");
 
-export default function UploadButton({ value, onChange }) {
+export default function UploadButton({ value, onChange, type }) {
   const [loading, setLoading] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
   async function pickImage() {
     try {
       setLoading(true);
@@ -29,6 +33,7 @@ export default function UploadButton({ value, onChange }) {
       });
       if (!result.canceled) {
         const image = result.assets[0];
+        setPreviewImage(image.uri);
         let file;
         if (Platform.OS === "web") {
           file = image.file;
@@ -52,9 +57,8 @@ export default function UploadButton({ value, onChange }) {
       setLoading(false);
     }
   }
-
-  return (
-    <View style={{ padding: 20 }}>
+  const imageRequestButton = (
+    <>
       <Pressable style={styles.uploadButton} onPress={pickImage}>
         {loading ? (
           <ActivityIndicator
@@ -68,6 +72,34 @@ export default function UploadButton({ value, onChange }) {
           </Text>
         )}
       </Pressable>
+    </>
+  );
+  const profilePicButton = (
+    <>
+      <Pressable style={styles.profilePicButton} onPress={pickImage}>
+        <Image
+          source={previewImage ? { uri: previewImage } : defaultProfilePic}
+          style={styles.profileImage}
+        />
+        <View style={styles.overlay} />
+
+        {loading ? (
+          <ActivityIndicator
+            style={{ marginVertical: "auto", paddingVertical: "auto" }}
+            size="small"
+            color="white"
+          />
+        ) : value ? (
+          <Feather name="edit" size={24} color="white" />
+        ) : (
+          <Entypo name="plus" size={24} color="white" />
+        )}
+      </Pressable>
+    </>
+  );
+  return (
+    <View style={{ padding: 20 }}>
+      {type === "ProfilePic" ? profilePicButton : imageRequestButton}
     </View>
   );
 }
@@ -89,5 +121,25 @@ const styles = StyleSheet.create({
   uploadButtonText: {
     fontSize: 20,
     fontFamily: fonts.regular,
+  },
+  profilePicButton: {
+    width: 150,
+    height: 150,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 100,
+    borderWidth: 1,
+    alignSelf: "center",
+  },
+  profileImage: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    borderRadius: 100,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 100,
   },
 });

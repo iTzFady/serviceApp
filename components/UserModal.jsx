@@ -24,8 +24,10 @@ import {
 } from "react-native";
 import AlertMessage from "./Alert";
 import RatingStars from "./RatingStars";
-const profilePic = require("@/assets/images/default-profile.png");
-const { width, height } = Dimensions.get("window");
+const defaultProfilePic = require("@/assets/images/default-profile.png");
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
+const { width } = Dimensions.get("window");
 export default function RequestModal({ show, setShow, userType = "worker" }) {
   const slideAnim = useRef(new Animated.Value(width)).current;
   const { user, updateUser } = useUser();
@@ -113,7 +115,15 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
             alignItems: "center",
           }}
         >
-          <Image source={profilePic} style={styles.image} resizeMode="cover" />
+          <Image
+            source={
+              user?.profilePictureUrl
+                ? { uri: `${apiUrl}${user?.profilePictureUrl}` }
+                : defaultProfilePic
+            }
+            style={styles.image}
+            resizeMode="cover"
+          />
           <View style={styles.profileContainer}>
             <Text style={styles.nameText}>{user?.name}</Text>
 

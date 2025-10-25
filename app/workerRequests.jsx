@@ -90,6 +90,7 @@ export default function Request() {
         rating={item.requestedBy.rating || 0}
         request={item.title || "No title"}
         dateTime={formatTime(item.dateTime)}
+        profilePicUrl={item.requestedBy.profilePictureUrl}
         status={item.status}
         onPress={() => {
           setShowModal(!showModal);

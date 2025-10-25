@@ -2,12 +2,14 @@ import { fonts } from "@/theme/fonts";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
-const profilePic = require("@/assets/images/default-profile.png");
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+const defaultProfilePic = require("@/assets/images/default-profile.png");
 export default function RequestCard({
   name,
   rating,
   request,
   dateTime,
+  profilePicUrl,
   status,
   onPress,
 }) {
@@ -22,7 +24,15 @@ export default function RequestCard({
       </View>
 
       <View style={styles.profileContainer}>
-        <Image source={profilePic} style={styles.image} resizeMode="cover" />
+        <Image
+          source={
+            profilePicUrl
+              ? { uri: `${apiUrl}${profilePicUrl}` }
+              : defaultProfilePic
+          }
+          style={styles.image}
+          resizeMode="cover"
+        />
         <View style={styles.ratingContainer}>
           <MaterialCommunityIcons
             name="star"
