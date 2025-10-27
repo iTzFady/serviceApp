@@ -1,4 +1,5 @@
 import { fonts } from "@/theme/fonts";
+import { shadow } from "@/theme/styles";
 import { Entypo, Feather } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
@@ -112,11 +113,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(0, 0, 0, 0.5)",
     backgroundColor: "rgba(165, 234, 237, 0.88)",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 4 },
+    ...shadow,
   },
   uploadButtonText: {
     fontSize: 20,

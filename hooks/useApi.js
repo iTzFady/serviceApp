@@ -10,5 +10,12 @@ export const useApi = () => {
     headers: { Authorization: `Bearer ${token}` },
   });
 
-  api.interceptors.response.use((res) => res);
+  api.interceptors.response.use(
+    (res) => res,
+    (err) => {
+      if (err.response?.status === 401) removeToken();
+      return Promise.reject;
+    }
+  );
+  return api;
 };

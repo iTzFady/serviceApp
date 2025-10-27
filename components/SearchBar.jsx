@@ -1,4 +1,5 @@
 import { fonts } from "@/theme/fonts";
+import { shadow } from "@/theme/styles";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRef, useState } from "react";
 import {
@@ -9,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-export default function SearchBar() {
+export default function SearchBar({ handlePress, handleChangeText }) {
   const [focused, setFocused] = useState(false);
   const [searchBarLayout, setSearchBarLayout] = useState({
     width: 0,
@@ -56,7 +57,7 @@ export default function SearchBar() {
       >
         <TouchableOpacity
           onPress={() => {
-            toggleSearch(!focused);
+            handlePress();
           }}
         >
           <MaterialIcons name="search" size={14} color="#333" />
@@ -73,6 +74,8 @@ export default function SearchBar() {
           style={styles.input}
           onFocus={() => toggleSearch(true)}
           onBlur={() => toggleSearch(false)}
+          onSubmitEditing={handlePress}
+          onChangeText={handleChangeText}
         />
       </Animated.View>
     </View>
@@ -85,13 +88,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff",
     borderRadius: 5,
-    width: "50%",
+    flex: 1,
     height: 25,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 4 },
+    ...shadow,
   },
   input: {
     fontSize: 12,

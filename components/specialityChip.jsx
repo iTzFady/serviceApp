@@ -1,6 +1,7 @@
 import DynamicIcon from "@/components/DynamicIcon";
 
 import { fonts } from "@/theme/fonts";
+import { shadow } from "@/theme/styles";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function SpecialityChip({
@@ -43,10 +44,6 @@ const styles = StyleSheet.create({
   selected: {
     backgroundColor: "rgba(159, 223, 105, 1)",
     borderWidth: 1,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 4 },
+    ...shadow,
   },
 });

@@ -1,5 +1,6 @@
 import { Regions } from "@/data/regions";
 import { fonts } from "@/theme/fonts";
+import { shadow } from "@/theme/styles";
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { memo, useMemo } from "react";
@@ -116,12 +117,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 1)",
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,1)",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 4 },
+    ...shadow,
   },
   image: {
     width: 20,

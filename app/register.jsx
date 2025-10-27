@@ -529,7 +529,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: 45,
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,1)",
   },
   dropdownSelectText: {
     color: "#000",

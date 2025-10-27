@@ -1,49 +1,45 @@
 import { default as Alert, default as AlertMessage } from "@/components/Alert";
 import MiniRequest from "@/components/MiniRequest";
 import SearchBar from "@/components/SearchBar";
-import SpecialityChip from "@/components/specialityChip.jsx";
 import UserModal from "@/components/UserModal";
-import WebSelect from "@/components/WebSelect";
 import WorkerCard from "@/components/WorkerCard";
 import { useRequestsHub } from "@/context/RequestsHubContext";
 import { ThemeContext } from "@/context/ThemeContext";
 import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
+import { useFetchUserData } from "@/hooks/useFetchUserData";
 import { fonts } from "@/theme/fonts";
 import { Entypo, FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import axios from "axios";
 import { useRouter } from "expo-router";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import Animated, { LinearTransition } from "react-native-reanimated";
+
+import FilterSection from "@/components/FilterSection";
+import { shadow } from "@/theme/styles";
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   Platform,
   Pressable,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { Dropdown } from "react-native-element-dropdown";
-import Animated, { LinearTransition } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Regions } from "../data/regions";
-import { Speciality } from "../data/speciality";
 const logo = require("../assets/images/logo.png");
 export default function Index() {
-  const { user, updateUser } = useUser();
+  const { user } = useUser();
   const { token, setToken, removeToken } = useToken();
+  const { workers, requests, loading, setRequests } = useFetchUserData();
   const { events } = useRequestsHub();
   const { colorScheme } = useContext(ThemeContext);
   const [selectedChip, setSelectedChip] = useState(null);
   const [currentRegion, setCurrentRegion] = useState(null);
-  const [workers, setWorkers] = useState([]);
-  const [requests, setRequests] = useState([]);
-  const [currentUser, setCurrentUser] = useState(user?.name);
   const [showUserModal, setShowUserModal] = useState(false);
-  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+  const [query, setQuery] = useState("");
   const router = useRouter();
   useEffect(() => {
     const checkToken = async () => {
@@ -52,58 +48,6 @@ export default function Index() {
     };
     checkToken();
   }, [router]);
-  useEffect(() => {
-    if (!token) return;
-    const controller = new AbortController();
-    axios({
-      method: "get",
-      url: `${apiUrl}/api/user/me`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        updateUser(res.data);
-        if (!currentUser && res.data.name) {
-          setCurrentUser(res.data.name);
-        }
-      })
-      .catch(handleError);
-    return () => controller.abort();
-  }, [token]);
-  useEffect(() => {
-    if (!token) return;
-    const controller = new AbortController();
-    axios({
-      method: "get",
-      url: `${apiUrl}/api/user/workers`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      signal: controller.signal,
-    })
-      .then((res) => {
-        setWorkers(res.data);
-      })
-      .catch(handleError);
-    return () => controller.abort();
-  }, [token]);
-
-  useEffect(() => {
-    if (!token) return;
-    const controller = new AbortController();
-
-    axios
-      .get(`${apiUrl}/api/requests/getClientRequests`, {
-        headers: { Authorization: `Bearer ${token}` },
-        signal: controller.signal,
-      })
-      .then((res) => {
-        if (res.data) setRequests(res.data);
-      })
-      .catch(() => {});
-    return () => controller.abort();
-  }, [token]);
 
   useEffect(() => {
     if (!events.length) return;
@@ -192,7 +136,16 @@ export default function Index() {
     },
     [handlePress]
   );
-
+  const handleSearch = useCallback(
+    (query) => {
+      setQuery("");
+      router.push({
+        pathname: `/search/`,
+        params: { query },
+      });
+    },
+    [router]
+  );
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.topStyle}>
@@ -218,9 +171,12 @@ export default function Index() {
         ) : null}
       </View>
       <View style={styles.container}>
-        <Text style={styles.welcomeText}>مرحبا، {currentUser}</Text>
+        <Text style={styles.welcomeText}>مرحبا، {user?.name}</Text>
         <View style={styles.topBar}>
-          <SearchBar />
+          <SearchBar
+            handlePress={() => handleSearch(query)}
+            handleChangeText={setQuery}
+          />
           <Pressable style={styles.requestButton}>
             <Entypo
               style={{ marginRight: 10 }}
@@ -231,81 +187,18 @@ export default function Index() {
             <Text style={styles.requestButtonText}>طلب خدمه</Text>
           </Pressable>
         </View>
-        <View style={styles.workerCategory}>
-          <View style={styles.category}>
-            <Text style={styles.categoryRightText}>اختر التخصص</Text>
-            <TouchableOpacity
-              style={{ width: "50%" }}
-              onPress={() => setSelectedChip(null)}
-            >
-              <Text style={styles.categoryLeftText}>كل التخصصات</Text>
-            </TouchableOpacity>
-          </View>
-          <ScrollView
-            style={styles.categoryTabs}
-            horizontal={true}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-              justifyContent: "center",
-              alignItems: "center",
-              flexGrow: 1,
-            }}
-          >
-            {Speciality.map((speciality) => (
-              <SpecialityChip
-                key={speciality.id}
-                iconPath={speciality.icon}
-                text={speciality.label}
-                value={speciality.value}
-                selected={selectedChip === speciality.value}
-                onPressEvent={() => setSelectedChip(speciality.value)}
-              />
-            ))}
-          </ScrollView>
-        </View>
-
-        {Platform.OS === "web" ? (
-          <WebSelect
-            data={Regions}
-            onChange={(value) => setCurrentRegion(value)}
-            placeHolder="..اختر منطقتك"
-          />
-        ) : (
-          <View style={styles.dropdownContainer}>
-            <Dropdown
-              style={styles.dropdown}
-              mode="modal"
-              data={Regions}
-              placeholderStyle={styles.dropdownPlaceholder}
-              selectedTextStyle={styles.dropdownSelectText}
-              itemTextStyle={styles.dropdownItem}
-              maxHeight={250}
-              search
-              searchPlaceholder="ابحث عن منطقتك"
-              searchPlaceholderTextColor="#808080"
-              inputSearchStyle={{
-                textAlign: "right",
-                fontFamily: fonts.light,
-              }}
-              labelField="label"
-              valueField="value"
-              placeholder="اختر منطقتك"
-              onChange={(item) => setCurrentRegion(item.value)}
-              activeColor="#e0f7fa"
-            />
-          </View>
-        )}
+        <FilterSection
+          setSelectedChip={setSelectedChip}
+          setCurrentRegion={setCurrentRegion}
+          selectedChip={selectedChip}
+        />
         {requests.length > 0 ? (
           <View style={styles.workerCategory}>
             <View style={styles.category}>
               <Text style={styles.categoryRightText}>
                 تم الارسال الطلب ....
               </Text>
-              <TouchableOpacity
-                style={{ width: "50%" }}
-                onPress={() => router.push("/clientRequests")}
-              >
+              <TouchableOpacity onPress={() => router.push("/clientRequests")}>
                 <Text style={styles.categoryLeftText}>عرض كل الطلبات</Text>
               </TouchableOpacity>
             </View>
@@ -323,8 +216,11 @@ export default function Index() {
             <Text style={styles.categoryRightText}>الصنايعه المتاحيين...</Text>
             <Text style={styles.categoryLeftText}>متاح الان</Text>
           </View>
-
-          {Platform.OS === "web" ? (
+          {loading ? (
+            <ActivityIndicator size="large" color="green" />
+          ) : !workers.length ? (
+            <Text>لا يوجد صنايعية في الوقت الحالي</Text>
+          ) : Platform.OS === "web" ? (
             <FlatList
               keyExtractor={keyExtractor}
               contentContainerStyle={{ height: "70vh" }}
@@ -395,17 +291,13 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   requestButton: {
-    width: "50%",
+    flex: 1,
     height: 25,
     flexDirection: "row-reverse",
     alignItems: "center",
     backgroundColor: "rgba(175, 237, 123, 1)",
     borderRadius: 5,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 4 },
+    ...shadow,
   },
   requestButtonText: {
     fontFamily: fonts.light,
@@ -420,68 +312,21 @@ const styles = StyleSheet.create({
   },
   category: {
     flexDirection: "row-reverse",
-    width: "100%",
     alignItems: "center",
   },
   categoryLeftText: {
     textAlign: "left",
     fontSize: 12,
-    width: "50%",
+    flex: 1,
     fontFamily: fonts.light,
     color: "rgba(34, 71, 3, 1)",
   },
   categoryRightText: {
     textAlign: "right",
-    width: "50%",
+    flex: 1,
     fontSize: 15,
     fontFamily: fonts.semiBold,
     color: "rgba(34, 71, 3, 1)",
-  },
-  categoryTabs: {
-    marginTop: 10,
-  },
-  dropdownContainer: {
-    flexDirection: "column",
-    alignItems: "center",
-    alignContent: "center",
-    width: "100%",
-    paddingHorizontal: 20,
-  },
-  dropdown: {
-    width: "100%",
-    backgroundColor: "#fff",
-    borderRadius: 5,
-    marginBlock: 10,
-    height: 25,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 4 },
-  },
-  dropdownSelectText: {
-    color: "#000",
-    textAlign: "right",
-    fontSize: 12,
-    fontFamily: fonts.extraLight,
-  },
-  dropdownPlaceholder: {
-    color: "black",
-    textAlign: "right",
-    marginRight: 8,
-    fontSize: 12,
-    fontFamily: fonts.extraLight,
-  },
-  dropdownItemContainer: {
-    flexDirection: "row-reverse",
-    alignItems: "center",
-    margin: 10,
-  },
-  dropdownItem: {
-    color: "#333",
-    textAlign: "right",
-    fontSize: 20,
-    marginRight: 15,
-    fontFamily: fonts.extraLight,
+    marginVertical: "auto",
   },
 });

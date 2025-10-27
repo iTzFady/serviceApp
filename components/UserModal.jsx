@@ -229,7 +229,6 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     borderWidth: 1,
-    borderColor: "black",
     marginLeft: 10,
   },
   ratingContainer: {

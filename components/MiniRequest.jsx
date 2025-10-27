@@ -1,5 +1,7 @@
 import { fonts } from "@/theme/fonts";
+import { shadow } from "@/theme/styles";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { memo } from "react";
 import {
   Image,
   Linking,
@@ -11,13 +13,7 @@ import {
 const defaultProfilePic = require("@/assets/images/default-profile.png");
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-export default function MiniRequest({
-  name,
-  profilePicUrl,
-  rating,
-  status,
-  phoneNumber,
-}) {
+function MiniRequest({ name, profilePicUrl, rating, status, phoneNumber }) {
   const openDialer = () => {
     Linking.canOpenURL(`tel:${phoneNumber}`).then((supported) => {
       if (supported) {
@@ -154,11 +150,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 9,
     paddingVertical: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 6,
+    ...shadow,
   },
   requestStatus: {
     flexDirection: "row-reverse",
@@ -182,3 +174,4 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
 });
+export default memo(MiniRequest);

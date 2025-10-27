@@ -1,4 +1,5 @@
 import { fonts } from "@/theme/fonts";
+import { shadow } from "@/theme/styles";
 import {
   FontAwesome,
   MaterialCommunityIcons,
@@ -83,11 +84,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     borderRadius: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 6,
+    ...shadow,
   },
   textContainer: {
     flex: 1,
@@ -128,7 +125,6 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     borderWidth: 1,
-    borderColor: "black",
   },
 
   ratingContainer: {

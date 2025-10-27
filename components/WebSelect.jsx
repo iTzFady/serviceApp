@@ -1,4 +1,5 @@
 import { fonts } from "@/theme/fonts";
+import { shadow } from "@/theme/styles";
 import { memo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -26,11 +27,7 @@ const styles = StyleSheet.create({
     width: "95%",
     marginTop: 10,
     alignSelf: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 4 },
+    ...shadow,
   },
   label: {
     textAlign: "right",

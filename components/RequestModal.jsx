@@ -1,5 +1,6 @@
 import { useUser } from "@/context/UserContext";
 import { fonts } from "@/theme/fonts";
+import { shadow } from "@/theme/styles";
 import { formatTime } from "@/utility/formatTime";
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
@@ -10,7 +11,6 @@ import {
   Dimensions,
   Image,
   Modal,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -449,18 +449,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 20,
     minHeight: screenHeight * 0.4,
-    ...Platform.select({
-      web: {
-        boxShadow: "0px -4px 12px rgba(0,0,0,0.5)",
-      },
-      default: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.5,
-        shadowRadius: 6,
-        elevation: 8,
-      },
-    }),
+    ...shadow,
   },
   modalInner: {
     flex: 1,
@@ -525,16 +514,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderRadius: 5,
     padding: 8,
-    ...Platform.select({
-      web: { boxShadow: "0px 2px 4px rgba(0,0,0,0.3)" },
-      default: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 3,
-        elevation: 3,
-      },
-    }),
+    ...shadow,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -548,16 +528,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 10,
-    ...Platform.select({
-      web: { boxShadow: "0px 2px 4px rgba(0,0,0,0.3)" },
-      default: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.4,
-        shadowRadius: 3,
-        elevation: 4,
-      },
-    }),
+    ...shadow,
   },
   buttonText: {
     color: "#fff",

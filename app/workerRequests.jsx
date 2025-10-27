@@ -7,6 +7,7 @@ import { useRequestsHub } from "@/context/RequestsHubContext";
 import { ThemeContext } from "@/context/ThemeContext";
 import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
+import { shadow } from "@/theme/styles";
 import { formatTime } from "@/utility/formatTime";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
@@ -243,11 +244,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignContent: "center",
     height: 100,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 2,
-    elevation: 8,
+    ...shadow,
   },
   topButton: {
     width: 25,
