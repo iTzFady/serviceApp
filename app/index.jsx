@@ -67,7 +67,6 @@ export default function Index() {
         if (!currentUser && res.data.name) {
           setCurrentUser(res.data.name);
         }
-        console.log(user);
       })
       .catch(handleError);
     return () => controller.abort();
@@ -85,7 +84,6 @@ export default function Index() {
     })
       .then((res) => {
         setWorkers(res.data);
-        console.log(res.data);
       })
       .catch(handleError);
     return () => controller.abort();
@@ -139,7 +137,7 @@ export default function Index() {
         "You must re-login because session ended"
       );
       removeToken();
-      router.replace();
+      router.replace("/login");
     }
     if (err.response && err.response.data)
       Alert(
@@ -205,7 +203,7 @@ export default function Index() {
           <MaterialIcons
             name="settings"
             size={25}
-            color="rgba(51, 109, 3, 1)="
+            color="rgba(51, 109, 3, 1)"
           />
         </TouchableOpacity>
         <Image style={styles.logo} source={logo} resizeMode="contain" />
@@ -283,6 +281,13 @@ export default function Index() {
               selectedTextStyle={styles.dropdownSelectText}
               itemTextStyle={styles.dropdownItem}
               maxHeight={250}
+              search
+              searchPlaceholder="ابحث عن منطقتك"
+              searchPlaceholderTextColor="#808080"
+              inputSearchStyle={{
+                textAlign: "right",
+                fontFamily: fonts.light,
+              }}
               labelField="label"
               valueField="value"
               placeholder="اختر منطقتك"
@@ -446,6 +451,7 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#fff",
     borderRadius: 5,
+    marginBlock: 10,
     height: 25,
     elevation: 4,
     shadowColor: "#000",

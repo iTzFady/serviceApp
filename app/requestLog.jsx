@@ -1,6 +1,5 @@
 import AlertMessage from "@/components/Alert";
-import ConversationPopup from "@/components/ConversationPopup";
-import RequestCard from "@/components/RequestCard";
+import LogCard from "@/components/LogCard";
 import RequestModal from "@/components/RequestModal";
 import UserModal from "@/components/UserModal";
 import { useRequestsHub } from "@/context/RequestsHubContext";
@@ -24,15 +23,16 @@ import {
 } from "react-native";
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-export default function Request() {
+export default function RequestLog() {
   const { user } = useUser();
   const { token, setToken } = useToken();
   const { events } = useRequestsHub();
+  const { colorScheme } = useContext(ThemeContext);
   const [requests, setRequests] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
-  const [showContactModal, setShowContactModal] = useState(false);
-  const { colorScheme } = useContext(ThemeContext);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const router = useRouter();
   useEffect(() => {
@@ -51,6 +51,7 @@ export default function Request() {
           .get(`${apiUrl}/api/requests/getClientRequests`, {
             headers: {
               Authorization: `Bearer ${token}`,
+              isLog: true,
             },
             signal: controller.signal,
           })
@@ -95,24 +96,36 @@ export default function Request() {
 
   const renderItems = useCallback(({ item }) => {
     return (
-      <RequestCard
+      <LogCard
         key={item.id}
-        name={item.requestedFor.name || "Unknown"}
+        workerName={item.requestedFor.name || "Unknown"}
+        clientName={item.requestedBy.name || "Unknown"}
         rating={item.requestedFor.rating || 0}
         request={item.title || "No title"}
-        dateTime={formatTime(item.dateTime)}
+        dateTime={formatTime(item.completedTime)}
         status={item.status}
-        onPress={() => {
-          setShowModal(!showModal);
-          setSelectedRequest(item);
+        RatingDisabled={item.hasRated}
+        ReportDisabled={item.hasReported}
+        onRatingPress={() => {
+          if (!item.hasRated) {
+            setShowRatingModal(!showRatingModal);
+            setSelectedRequest(item);
+          } else {
+            AlertMessage("تنبيه", "تم تسجيل تقييمك لهذا المستخدم مسبقًا");
+          }
+        }}
+        onReportPress={() => {
+          if (!item.hasReported) {
+            setShowReportModal(!showReportModal);
+            setSelectedRequest(item);
+          } else {
+            AlertMessage("تنبيه", "لقد قمت بالإبلاغ عن هذا المستخدم من قبل");
+          }
         }}
       />
     );
   }, []);
-  const handleContactModal = useCallback(() => {
-    setShowModal(false);
-    setShowContactModal(true);
-  }, []);
+
   return (
     <View style={styles.safeArea}>
       <View>
@@ -128,7 +141,7 @@ export default function Request() {
                 color="rgba(0,0,0,1)"
               />
             </TouchableOpacity>
-            <Text style={styles.topText}>الطلبات</Text>
+            <Text style={styles.topText}>سجل الطلبات</Text>
           </View>
         </View>
         {Platform.OS === "web" ? (
@@ -171,13 +184,40 @@ export default function Request() {
         url={apiUrl}
         token={token}
         userType="Client"
-        handleContact={handleContactModal}
       />
-      <ConversationPopup
-        show={showContactModal}
-        setShow={setShowContactModal}
-        phoneNumber={selectedRequest?.requestedFor.phoneNumber}
+      <RequestModal
+        request={selectedRequest}
+        show={showRatingModal}
+        setShow={setShowRatingModal}
+        url={apiUrl}
+        token={token}
+        userType="Client"
+        type="rating"
+        jobId={selectedRequest?.id}
+        ratedUser={
+          selectedRequest?.requestedFor?.id === user?.id
+            ? selectedRequest?.requestedBy?.id
+            : selectedRequest?.requestedFor?.id
+        }
+        setRequests={setRequests}
       />
+      <RequestModal
+        request={selectedRequest}
+        show={showReportModal}
+        setShow={setShowReportModal}
+        url={apiUrl}
+        token={token}
+        userType="Client"
+        type="report"
+        jobId={selectedRequest?.id}
+        ratedUser={
+          selectedRequest?.requestedFor?.id === user?.id
+            ? selectedRequest?.requestedBy?.id
+            : selectedRequest?.requestedFor?.id
+        }
+        setRequests={setRequests}
+      />
+
       <UserModal show={showUserModal} setShow={setShowUserModal} />
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </View>

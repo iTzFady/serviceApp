@@ -26,7 +26,6 @@ import AlertMessage from "./Alert";
 import RatingStars from "./RatingStars";
 const defaultProfilePic = require("@/assets/images/default-profile.png");
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-
 const { width } = Dimensions.get("window");
 export default function RequestModal({ show, setShow, userType = "worker" }) {
   const slideAnim = useRef(new Animated.Value(width)).current;
@@ -90,6 +89,7 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
       router.replace("/login");
     }
   }, [updateUser]);
+
   return (
     <Modal
       visible={show}
@@ -144,7 +144,13 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
             <MaterialCommunityIcons name="bell" size={20} color="black" />
             <Text style={styles.buttonText}>الاشعارات</Text>
           </Pressable>
-          <Pressable style={styles.button}>
+          <Pressable
+            onPress={() => {
+              router.push("/requestLog");
+              setShow(false);
+            }}
+            style={styles.button}
+          >
             <Octicons name="log" size={20} color="black" />
             <Text style={styles.buttonText}>سجل الطلبات</Text>
           </Pressable>

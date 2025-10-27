@@ -12,7 +12,6 @@ const defaultProfilePic = require("../assets/images/default-profile.png");
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 function WorkerCard({
-  id,
   name,
   workerSpecialty,
   isAvailable,

@@ -10,8 +10,8 @@ function WebSelect({ data, value, onChange, label, placeHolder }) {
         value={value}
         onChange={(e) => onChange(e.currentTarget.value)}
         style={styles.select}
+        placeholder={placeHolder}
       >
-        <option value="">{placeHolder}</option>
         {data.map((item) => (
           <option key={item.value} value={item.value}>
             {item.label}

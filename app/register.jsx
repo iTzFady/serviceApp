@@ -87,7 +87,7 @@ export default function RegisterPage() {
     await axios({
       method: "post",
       url: `${apiUrl}/api/user/register`,
-      timeout: 25000,
+      timeout: 0,
       headers: {
         "Content-Type": "multipart/form-data",
       },

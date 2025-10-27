@@ -1,25 +1,55 @@
 import { fonts } from "@/theme/fonts";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  FontAwesome,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import RequestState from "./RequestState";
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 const defaultProfilePic = require("@/assets/images/default-profile.png");
-export default function RequestCard({
-  name,
+export default function LogCard({
+  clientName,
+  workerName,
   rating,
   request,
   dateTime,
   profilePicUrl,
-  onPress,
+  status,
+  onReportPress,
+  onRatingPress,
 }) {
   return (
-    <Pressable style={styles.container} onPress={onPress}>
+    <View style={styles.container}>
+      <RequestState style={styles.requestState} state={status} />
       <View style={styles.textContainer}>
         <Text numberOfLines={1} style={styles.requestText}>
           {request}
         </Text>
-        <Text style={styles.nameText}>{name}</Text>
+        <View
+          style={{
+            flexDirection: "row-reverse",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <Text style={styles.nameText}>{clientName}</Text>
+          <FontAwesome name="long-arrow-left" size={20} color="black" />
+          <Text style={styles.nameText}>{workerName}</Text>
+        </View>
         <Text style={styles.dateText}>{dateTime}</Text>
+
+        <View style={styles.buttonContainer}>
+          <Pressable style={styles.button} onPress={onRatingPress}>
+            <MaterialIcons name="rate-review" size={24} color="black" />
+            <Text style={styles.buttonText}>تقيم</Text>
+          </Pressable>
+          <Pressable style={styles.button} onPress={onReportPress}>
+            <MaterialIcons name="report" size={24} color="black" />
+            <Text style={styles.buttonText}>ابلغ عن مستخدم</Text>
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.profileContainer}>
@@ -41,7 +71,7 @@ export default function RequestCard({
           <Text style={styles.ratingText}>{rating}</Text>
         </View>
       </View>
-    </Pressable>
+    </View>
   );
 }
 const styles = StyleSheet.create({
@@ -49,7 +79,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "rgba(17, 125, 129, 0.04)",
+    backgroundColor: "white",
     padding: 16,
     marginVertical: 8,
     borderRadius: 5,
@@ -111,5 +141,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "black",
     marginLeft: 4,
+  },
+  requestState: {
+    position: "absolute",
+    left: 20,
+    top: 20,
+    zIndex: 10,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    marginBlock: 10,
+    gap: 5,
+    flex: 1,
+  },
+  button: {
+    backgroundColor: "rgba(159, 223, 105, 1)",
+    width: "50%",
+    flexDirection: "row-reverse",
+    gap: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 5,
+    borderRadius: 5,
+    borderWidth: 1,
+  },
+  buttonText: {
+    fontFamily: fonts.extraLight,
+    fontSize: 12,
   },
 });

@@ -9,6 +9,7 @@ import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
 import { Speciality } from "@/data/speciality";
 import { fonts } from "@/theme/fonts";
+import { toLocalTimestamp } from "@/utility/formatTime";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -62,21 +63,26 @@ export default function RequestWorker() {
   const onSubmit = (data) => {
     setLoading(true);
     const formData = new FormData();
-    const dateTime = `${data.date}T${data.time}:00`;
-    console.log(`${data.date}`);
+    const dateTime = () => {
+      if (Platform.OS === "web") {
+        return `${data.date}T${data.time}:00`;
+      } else {
+        return toLocalTimestamp(data.date.toISOString());
+      }
+    };
     formData.append("requestedByUserId", user?.id);
     formData.append("RequestedForUserId", id);
     formData.append("title", data.type);
     formData.append("Description", data.description);
     formData.append("location", data.address);
-    formData.append("dateTime", dateTime);
+    formData.append("dateTime", dateTime());
     formData.append("notes", data.notes);
     formData.append("images", data.image);
     axios({
       url: `${apiUrl}/api/requests`,
       method: "post",
       data: formData,
-      timeout: 5000,
+      timeout: 0,
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "multipart/form-data",
@@ -88,6 +94,7 @@ export default function RequestWorker() {
         router.replace("/");
       })
       .catch((err) => {
+        console.log(err);
         if (err.response && err.response.data) {
           AlertMessage(
             "Error",
@@ -281,7 +288,7 @@ export default function RequestWorker() {
                           </Pressable>
                           {showDate && (
                             <DateTimePicker
-                              value={value || new Date()}
+                              value={value}
                               mode="date"
                               display="default"
                               onChange={(event, selectedDate) => {
@@ -333,7 +340,7 @@ export default function RequestWorker() {
                           </Pressable>
                           {showTime && (
                             <DateTimePicker
-                              value={value || new Date()}
+                              value={value}
                               mode="time"
                               display="default"
                               onChange={(event, selectedTime) => {

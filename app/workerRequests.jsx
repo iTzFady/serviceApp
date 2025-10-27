@@ -1,4 +1,4 @@
-import { default as Alert, default as AlertMessage } from "@/components/Alert";
+import { default as Alert } from "@/components/Alert";
 import RequestCard from "@/components/RequestCard";
 import RequestModal from "@/components/RequestModal";
 import Switch from "@/components/Switch";
@@ -64,7 +64,20 @@ export default function Request() {
           });
       } catch (err) {
         if (axios.isCancel(err)) return;
-        AlertMessage("Error", "Faild to fetch requests");
+
+        if (err.response && err.response.data) {
+          Alert(
+            "Error",
+            err.response.data?.message || JSON.stringify(err.response.data)
+          );
+        } else if (err.request) {
+          Alert(
+            "Network Error",
+            "Unable to reach the server. Please check your connection."
+          );
+        } else {
+          Alert("Error", "Something went wrong. Please try again later.");
+        }
       }
     };
     fetchRequests();
