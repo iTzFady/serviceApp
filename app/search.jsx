@@ -3,7 +3,7 @@ import WorkerCard from "@/components/WorkerCard";
 import { useApi } from "@/hooks/useApi";
 import { fonts } from "@/theme/fonts";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
@@ -13,21 +13,22 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-const logo = require("../assets/images/logo.png");
 
 export default function SearchResultsScreen() {
-  const { query } = useLocalSearchParams();
   const api = useApi();
+  const router = useRouter();
+  const { query } = useLocalSearchParams();
   const [workers, setWorkers] = useState([]);
   const [selectedChip, setSelectedChip] = useState(null);
   const [currentRegion, setCurrentRegion] = useState(null);
   const [currentQuery, setCurrentQuery] = useState(query);
   useEffect(() => {
     api
-      .get("/api/user/workers", { headers: { allWorkers: true } })
+      .get("/api/user/workers?allWorkers=true")
       .then((res) => setWorkers(res.data))
       .catch((err) => console.error(err));
   }, []);
+
   const handlePress = useCallback(
     (id, name, job, rating, profilePicture) => {
       router.push({
@@ -129,10 +130,7 @@ export default function SearchResultsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   topStyle: {
-    backgroundColor: "rgba(127, 186, 78, 1);",
-    flexDirection: "column",
-    bottom: 0,
-    alignItems: "center",
+    backgroundColor: "rgba(127, 186, 78, 1)",
     height: 100,
     borderTopWidth: 1,
   },
@@ -150,8 +148,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    left: 5,
-    marginLeft: 20,
+    left: 15,
   },
   input: {
     backgroundColor: "#fff",

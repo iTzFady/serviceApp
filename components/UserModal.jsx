@@ -7,14 +7,13 @@ import {
   MaterialIcons,
   Octicons,
 } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
 import {
   Animated,
   Dimensions,
   Image,
   Modal,
-  PanResponder,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -29,49 +28,27 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 const { width } = Dimensions.get("window");
 export default function RequestModal({ show, setShow, userType = "worker" }) {
   const slideAnim = useRef(new Animated.Value(width)).current;
+  const router = useRouter();
   const { user, updateUser } = useUser();
   const { removeToken } = useToken();
   useEffect(() => {
     if (show) {
-      Animated.timing(slideAnim, {
+      Animated.spring(slideAnim, {
         toValue: 0,
-        duration: 300,
         useNativeDriver: true,
+        speed: 8,
+        bounciness: 3,
       }).start();
     } else {
-      Animated.timing(slideAnim, {
+      Animated.spring(slideAnim, {
         toValue: width,
-        duration: 300,
         useNativeDriver: true,
+        speed: 8,
+        bounciness: 3,
       }).start();
     }
   }, [show, slideAnim]);
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (_, gesture) => {
-        return Math.abs(gesture.dx) > Math.abs(gesture.dy) && gesture.dx > 10;
-      },
-      onPanResponderMove: (_, gesture) => {
-        if (gesture.dx > 0) {
-          slideAnim.setValue(gesture.dx);
-        }
-      },
-      onPanResponderRelease: (_, gesture) => {
-        if (gesture.dx > 100) {
-          Animated.timing(slideAnim, {
-            toValue: width,
-            duration: 200,
-            useNativeDriver: true,
-          }).start(() => setShow(false));
-        } else {
-          Animated.spring(slideAnim, {
-            toValue: 0,
-            useNativeDriver: true,
-          }).start();
-        }
-      },
-    })
-  ).current;
+
   const handleClose = useCallback(() => {
     Animated.timing(slideAnim, {
       toValue: width,
@@ -101,7 +78,6 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
       <Pressable style={styles.backdrop} onPress={handleClose} />
 
       <Animated.View
-        {...panResponder.panHandlers}
         style={[
           styles.modalContent,
           { transform: [{ translateX: slideAnim }] },

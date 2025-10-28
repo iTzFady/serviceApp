@@ -29,7 +29,7 @@ export default function IntroScreen() {
   const [showApp, setShowApp] = useState(false);
   const [loading, setLoading] = useState(true);
   const sliderRef = useRef(null);
-  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
+  const { colorScheme } = useContext(ThemeContext);
   useEffect(() => {
     const checkIntro = async () => {
       const hasSeenIntro = await AsyncStorage.getItem("hasSeenIntro");
@@ -185,8 +185,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    left: 5,
-    marginLeft: 20,
+    left: 15,
   },
 
   logo: {

@@ -228,10 +228,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   topStyle: {
-    backgroundColor: "rgba(127, 186, 78, 1);",
-    flexDirection: "column",
-    bottom: 0,
-    alignItems: "center",
+    backgroundColor: "rgba(127, 186, 78, 1)",
     height: 100,
     borderTopWidth: 1,
   },
@@ -249,8 +246,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    left: 5,
-    marginLeft: 20,
+    left: 15,
   },
 
   container: {

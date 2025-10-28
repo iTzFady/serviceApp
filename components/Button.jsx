@@ -13,6 +13,7 @@ function Button({
   borderRadius = 10,
   style,
   loading,
+  disabled,
 }) {
   return (
     <Shadow
@@ -32,7 +33,7 @@ function Button({
           },
           style,
         ]}
-        disabled={loading}
+        disabled={loading || disabled}
         onPress={onPressEvent}
       >
         {loading ? (

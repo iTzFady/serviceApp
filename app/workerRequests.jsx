@@ -1,4 +1,5 @@
 import { default as Alert } from "@/components/Alert";
+import ConversationPopup from "@/components/ConversationPopup";
 import RequestCard from "@/components/RequestCard";
 import RequestModal from "@/components/RequestModal";
 import Switch from "@/components/Switch";
@@ -30,6 +31,7 @@ export default function Request() {
   const [online, setOnline] = useState(user?.isAvailable);
   const [requests, setRequests] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
   const { colorScheme } = useContext(ThemeContext);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -119,6 +121,7 @@ export default function Request() {
         request.id === id ? { ...request, status: "Accepted" } : request
       )
     );
+    setShowContactModal(true);
   }, []);
   const removeItem = useCallback((id) => {
     setRequests((prev) => prev.filter((work) => work.id !== id));
@@ -229,8 +232,21 @@ export default function Request() {
         userType="Worker"
         acceptRequest={AcceptRequest}
         removeRequest={removeItem}
+        setShowContactModal={setShowContactModal}
+        requestType="worker"
       />
+      {showContactModal && (
+        <ConversationPopup
+          show={showContactModal}
+          setShow={setShowContactModal}
+          phoneNumber={selectedRequest?.requestedBy.phoneNumber}
+          requestedBy={selectedRequest?.requestedBy}
+          requestedFor={selectedRequest?.requestedFor}
+          router={router}
+        />
+      )}
       <UserModal show={showUserModal} setShow={setShowUserModal} />
+
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </View>
   );
@@ -240,9 +256,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   topStyle: {
-    flexDirection: "column",
-    alignItems: "center",
-    alignContent: "center",
     height: 100,
     ...shadow,
   },

@@ -199,13 +199,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginRight: 18,
     textAlign: "right",
-    width: "50%",
+    flex: 1,
   },
   error: {
     color: "red",
     marginTop: 5,
     marginLeft: 25,
-    width: "50%",
+    flex: 1,
   },
   registerLink: {
     color: "#214503",

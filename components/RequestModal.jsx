@@ -2,7 +2,11 @@ import { useUser } from "@/context/UserContext";
 import { fonts } from "@/theme/fonts";
 import { shadow } from "@/theme/styles";
 import { formatTime } from "@/utility/formatTime";
-import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  Entypo,
+  FontAwesome,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -37,6 +41,8 @@ export default function RequestModal({
   jobId,
   ratedUser,
   setRequests,
+  setShowContactModal,
+  requestType = "client",
 }) {
   const { user } = useUser();
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
@@ -173,7 +179,6 @@ export default function RequestModal({
       signal: controller.signal,
     })
       .then((res) => {
-        console.log(ratedUser);
         AlertMessage("Successful", "Report submitted Successfully");
         setShow(false);
         setComment("");
@@ -286,6 +291,16 @@ export default function RequestModal({
               ? request.requestedBy.name
               : request.requestedFor.name}
           </Text>
+          {request.status === "Accepted" && requestType === "worker" ? (
+            <TouchableOpacity
+              onPress={() => {
+                setShowContactModal(true);
+                setShow(false);
+              }}
+            >
+              <Entypo name="chat" size={17} color="white" />
+            </TouchableOpacity>
+          ) : null}
         </View>
         <View style={styles.ratingContainer}>
           <MaterialCommunityIcons

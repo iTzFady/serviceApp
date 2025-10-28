@@ -10,7 +10,14 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-export default function ConversationPopup({ show, setShow, phoneNumber }) {
+export default function ConversationPopup({
+  requestedBy,
+  requestedFor,
+  show,
+  setShow,
+  phoneNumber,
+  router,
+}) {
   const openDialer = useCallback(() => {
     Linking.canOpenURL(`tel:${phoneNumber}`).then((supported) => {
       if (supported) {
@@ -20,12 +27,27 @@ export default function ConversationPopup({ show, setShow, phoneNumber }) {
       }
     });
   }, [phoneNumber]);
+  const handlePress = useCallback(
+    (name, profilePicture) => {
+      setShow(false);
+      router.push({
+        pathname: `/chat/${requestedBy.id}`,
+        params: { name, profilePicture },
+      });
+    },
+    [router]
+  );
   return (
     <SafeAreaView>
       <Modal visible={show} transparent={true} animationType="fade">
         <Pressable onPress={() => setShow(!show)} style={styles.container}>
           <View style={styles.buttonContainer}>
-            <Pressable style={[styles.button, { backgroundColor: "#fff" }]}>
+            <Pressable
+              style={[styles.button, { backgroundColor: "#fff" }]}
+              onPress={() =>
+                handlePress(requestedBy.name, requestedBy.profilePictureUrl)
+              }
+            >
               <MaterialCommunityIcons
                 name="message-reply-text"
                 size={16}

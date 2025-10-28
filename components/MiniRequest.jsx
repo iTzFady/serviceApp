@@ -62,7 +62,7 @@ function MiniRequest({ name, profilePicUrl, rating, status, phoneNumber }) {
         style={[
           styles.requestStatus,
           styles.requestInfo,
-          { width: "45%", paddingVertical: 7, justifyContent: "space-between" },
+          { width: "45%", paddingVertical: 0, justifyContent: "space-between" },
           status === "Accepted"
             ? { backgroundColor: "#fff" }
             : { backgroundColor: "rgba(127, 186, 78, 0.61)" },

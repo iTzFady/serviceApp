@@ -100,10 +100,14 @@ function WorkerCard({
         <Button
           text="طلب الخدمه"
           height={25}
-          backgroundColor="rgba(159, 223, 105, 1)"
+          backgroundColor={
+            isAvailable ? "rgba(159, 223, 105, 1)" : "rgba(96, 98, 94, 1)"
+          }
+          color={isAvailable ? "#000" : "#fff"}
           borderRadius={5}
           fontSize={12}
           onPressEvent={onPress}
+          disabled={!isAvailable}
         />
       </View>
     </View>

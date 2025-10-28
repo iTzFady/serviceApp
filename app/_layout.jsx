@@ -61,7 +61,9 @@ function AppProviders() {
               <Stack.Screen name="login" />
               <Stack.Screen name="register" /> */}
               <Stack.Screen name="index" />
+              <Stack.Screen name="search" />
               <Stack.Screen name="requestWorker/[id]" />
+              <Stack.Screen name="chat/[id]" />
               <Stack.Screen name="workerRequests" />
             </Stack>
           </SafeAreaProvider>

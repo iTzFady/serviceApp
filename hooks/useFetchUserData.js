@@ -21,7 +21,7 @@ export const useFetchUserData = () => {
         setWorkers(workers.data);
         setRequests(requests.data);
       })
-      .catch(console.error)
+      .catch((err) => console.log(err))
       .finally(() => setLoading(false));
   }, []);
   return { workers, requests, loading, setRequests };

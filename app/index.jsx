@@ -199,7 +199,9 @@ export default function Index() {
                 تم الارسال الطلب ....
               </Text>
               <TouchableOpacity onPress={() => router.push("/clientRequests")}>
-                <Text style={styles.categoryLeftText}>عرض كل الطلبات</Text>
+                <Text style={styles.categoryLeftText}>
+                  عرض كل الطلبات الجارية
+                </Text>
               </TouchableOpacity>
             </View>
             <MiniRequest
