@@ -1,27 +1,24 @@
-import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
-import { createContext, useContext, useEffect, useState } from "react";
+import { HubConnectionBuilder } from "@microsoft/signalr";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 const RequestsHubContext = createContext();
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export const RequestsHubProvider = ({ token, children }) => {
-  const [connection, setConnection] = useState(null);
+  const connectionRef = useRef(null);
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
     if (!token) return;
+    let isMounted = true;
     const newConnection = new HubConnectionBuilder()
       .withUrl(`${apiUrl}/hubs/requests`, {
         accessTokenFactory: () => token.trim(),
       })
-      .configureLogging(LogLevel.Information)
       .withAutomaticReconnect()
       .build();
 
-    newConnection
-      .start()
-      .then(() => console.log("Connected"))
-      .catch((err) => console.log("Error Occured", err));
+    connectionRef.current = newConnection;
 
     newConnection.on("NewRequestCreated", (data) => {
       setEvents((prev) => [...prev, { type: "NewRequest", data }]);
@@ -41,14 +38,34 @@ export const RequestsHubProvider = ({ token, children }) => {
     newConnection.on("RequestRejected", (data) => {
       setEvents((prev) => [...prev, { type: "Rejected", data }]);
     });
-    setConnection(newConnection);
+
+    const startConnection = async () => {
+      try {
+        await newConnection.start();
+        if (!isMounted) {
+          await newConnection.stop();
+          return;
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    startConnection();
     return () => {
-      newConnection.stop();
+      isMounted = false;
+      if (connectionRef.current) {
+        connectionRef.current
+          .stop()
+          .then(() => console.log("Disconnected"))
+          .catch((err) => console.log(err));
+      }
     };
   }, [token]);
 
   return (
-    <RequestsHubContext.Provider value={{ connection, events }}>
+    <RequestsHubContext.Provider
+      value={{ connection: connectionRef.current, events }}
+    >
       {children}
     </RequestsHubContext.Provider>
   );

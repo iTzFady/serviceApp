@@ -2,10 +2,12 @@ import FilterSection from "@/components/FilterSection";
 import WorkerCard from "@/components/WorkerCard";
 import { useApi } from "@/hooks/useApi";
 import { fonts } from "@/theme/fonts";
+import { centerContainer } from "@/theme/styles";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
@@ -13,6 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 export default function SearchResultsScreen() {
   const api = useApi();
@@ -22,13 +25,27 @@ export default function SearchResultsScreen() {
   const [selectedChip, setSelectedChip] = useState(null);
   const [currentRegion, setCurrentRegion] = useState(null);
   const [currentQuery, setCurrentQuery] = useState(query);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
+    setLoading(true);
     api
       .get("/api/user/workers?allWorkers=true")
       .then((res) => setWorkers(res.data))
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        Toast.show({
+          type: "error",
+          text1: "حدث خطا ما",
+          text2: "يرجى المحاولة مرة أخرى لاحقًا",
+          text1Style: {
+            textAlign: "right",
+          },
+          text2Style: {
+            textAlign: "right",
+          },
+        });
+      })
+      .finally(() => setLoading(false));
   }, []);
-
   const handlePress = useCallback(
     (id, name, job, rating, profilePicture) => {
       router.push({
@@ -38,9 +55,7 @@ export default function SearchResultsScreen() {
     },
     [router]
   );
-
   const keyExtractor = useCallback((item) => item.id.toString(), []);
-
   const renderItem = useCallback(
     ({ item }) => {
       const pressHandler = () => {
@@ -118,12 +133,23 @@ export default function SearchResultsScreen() {
           selectedChip={selectedChip}
         />
         <Text style={styles.text}>نتائج البحث</Text>
+      </View>
+      {loading ? (
+        <View style={centerContainer}>
+          <ActivityIndicator />
+        </View>
+      ) : filteredWorkers.length ? (
         <FlatList
           data={filteredWorkers}
           keyExtractor={keyExtractor}
           renderItem={renderItem}
+          contentContainerStyle={{ paddingHorizontal: 10 }}
         />
-      </View>
+      ) : (
+        <View style={centerContainer}>
+          <Text style={{ fontFamily: fonts.light }}>لا توجد نتائج</Text>
+        </View>
+      )}
     </View>
   );
 }

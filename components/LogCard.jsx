@@ -33,6 +33,7 @@ export default function LogCard({
             flexDirection: "row-reverse",
             alignItems: "center",
             gap: 8,
+            marginTop: 5,
           }}
         >
           <Text style={styles.nameText}>{clientName}</Text>
@@ -95,7 +96,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "black",
     textAlign: "right",
-    overflow: "hidden",
   },
 
   nameText: {
@@ -103,7 +103,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "black",
     textAlign: "right",
-    marginTop: 4,
   },
 
   dateText: {

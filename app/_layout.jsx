@@ -2,6 +2,7 @@ import { RequestsHubProvider } from "@/context/RequestsHubContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { TokenProvider, useToken } from "@/context/TokenContext";
 import { UserProvider } from "@/context/UserContext";
+import { useNotifications } from "@/hooks/useNotifications";
 import {
   Cairo_200ExtraLight,
   Cairo_300Light,
@@ -17,11 +18,12 @@ import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import Toast from "react-native-toast-message";
 SplashScreen.preventAutoHideAsync();
 
 function AppProviders() {
   const { token, loading } = useToken();
-
+  useNotifications();
   const [loaded, error] = useFonts({
     Cairo_200ExtraLight,
     Cairo_300Light,
@@ -66,6 +68,7 @@ function AppProviders() {
               <Stack.Screen name="chat/[id]" />
               <Stack.Screen name="workerRequests" />
             </Stack>
+            <Toast />
           </SafeAreaProvider>
         </ThemeProvider>
       </UserProvider>

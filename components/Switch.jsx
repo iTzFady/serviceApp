@@ -2,7 +2,7 @@ import { fonts } from "@/theme/fonts";
 import { useState } from "react";
 import { Animated, StyleSheet, Text, TouchableOpacity } from "react-native";
 
-export default function Switch({ state, toggleState }) {
+export default function Switch({ state, toggleState, disabled }) {
   const translateAnim = useState(new Animated.Value(state ? 0 : 1))[0];
 
   const toggleSwitch = () => {
@@ -25,7 +25,11 @@ export default function Switch({ state, toggleState }) {
   });
 
   return (
-    <TouchableOpacity onPress={toggleSwitch} activeOpacity={0.9}>
+    <TouchableOpacity
+      onPress={toggleSwitch}
+      activeOpacity={0.9}
+      disabled={disabled}
+    >
       <Animated.View style={styles.container}>
         <Animated.View
           style={[

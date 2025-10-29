@@ -1,4 +1,3 @@
-import AlertMessage from "@/components/Alert";
 import Button from "@/components/Button";
 import DynamicIcon from "@/components/DynamicIcon";
 import InputField from "@/components/InputField";
@@ -8,16 +7,17 @@ import { ThemeContext } from "@/context/ThemeContext";
 import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
 import { Speciality } from "@/data/speciality";
+import { useApi } from "@/hooks/useApi";
 import { fonts } from "@/theme/fonts";
 import { toLocalTimestamp } from "@/utility/formatTime";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -30,6 +30,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 const defaultProfilePic = require("@/assets/images/default-profile.png");
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -37,6 +38,9 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 export default function RequestWorker() {
   const { user } = useUser();
   const { token } = useToken();
+  const { id } = useLocalSearchParams();
+  const api = useApi();
+  const [worker, setWorker] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
@@ -57,9 +61,14 @@ export default function RequestWorker() {
       notes: "",
     },
   });
-  const { id, name, job, rating, profilePicture } = useLocalSearchParams();
-  const work = Speciality.find((w) => w.value === job);
+  const work = Speciality.find((w) => w.value === worker);
   const router = useRouter();
+  useEffect(() => {
+    api
+      .get(`/api/user/profile/${id}`)
+      .then((res) => setWorker(res.data))
+      .catch((err) => console.log(err));
+  }, [id]);
   const onSubmit = (data) => {
     setLoading(true);
     const formData = new FormData();
@@ -78,42 +87,49 @@ export default function RequestWorker() {
     formData.append("dateTime", dateTime());
     formData.append("notes", data.notes);
     formData.append("images", data.image);
-    axios({
-      url: `${apiUrl}/api/requests`,
-      method: "post",
-      data: formData,
-      timeout: 0,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-      transformRequest: (data, headers) => data,
-    })
+    api
+      .post("/api/requests", formData, {
+        timeout: 0,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
       .then((res) => {
-        AlertMessage("Alert", res.data.message);
+        Toast.show({
+          type: "success",
+          text1: "نجحت العملية",
+          text2: "تم تسجيل الطلب بنجاح",
+          text1Style: {
+            textAlign: "right",
+          },
+          text2Style: {
+            textAlign: "right",
+          },
+        });
         router.replace("/");
       })
       .catch((err) => {
-        console.log(err);
-        if (err.response && err.response.data) {
-          AlertMessage(
-            "Error",
-            err.response.data?.message || JSON.stringify(err.response.data)
-          );
-        } else if (err.request) {
-          AlertMessage(
-            "Network Error",
-            "Unable to reach the server. Please check your connection."
-          );
-        } else {
-          AlertMessage(
-            "Error",
-            "Something went wrong. Please try again later."
-          );
-        }
+        Toast.show({
+          type: "error",
+          text1: "فشلت العملية",
+          text2: "برجاء المحاولة في وقت لاحق",
+          text1Style: {
+            textAlign: "right",
+          },
+          text2Style: {
+            textAlign: "right",
+          },
+        });
       })
       .finally(() => setLoading(false));
   };
+  if (!worker)
+    return (
+      <ActivityIndicator
+        size="large"
+        style={{ flex: 1, marginHorizontal: "auto", marginVertical: "auto" }}
+      />
+    );
   return (
     <View style={styles.safeArea}>
       <View style={styles.topStyle}>
@@ -139,12 +155,12 @@ export default function RequestWorker() {
               alt="Profile Picture"
               resizeMode="cover"
               source={
-                profilePicture
-                  ? { uri: `${apiUrl}${profilePicture}` }
+                worker?.profilePictureUrl
+                  ? { uri: `${apiUrl}${worker?.profilePictureUrl}` }
                   : defaultProfilePic
               }
             />
-            <Text style={styles.workerName}>{name}</Text>
+            <Text style={styles.workerName}>{worker.name}</Text>
           </View>
           <View style={styles.ratingContainer}>
             <View style={{ position: "relative", width: 24, height: 24 }}>
@@ -161,7 +177,7 @@ export default function RequestWorker() {
                 style={{ position: "absolute" }}
               />
             </View>
-            <Text style={styles.ratingText}>{rating}</Text>
+            <Text style={styles.ratingText}>{worker.rating}</Text>
           </View>
           <View style={styles.category}>
             <Text style={styles.categoryText}>{work?.label}</Text>

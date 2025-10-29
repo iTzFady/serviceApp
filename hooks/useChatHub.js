@@ -1,13 +1,17 @@
-import Alert from "@/components/Alert";
 import * as SignalR from "@microsoft/signalr";
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useRef, useState } from "react";
 import { LayoutAnimation } from "react-native";
+import Toast from "react-native-toast-message";
+import { useApi } from "./useApi";
+
 export default function useChatHub({ apiUrl, token, userId, receiverId }) {
   const [connection, setConnection] = useState(null);
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const api = useApi();
   const typingTimeout = useRef(null);
 
   useEffect(() => {
@@ -59,20 +63,13 @@ export default function useChatHub({ apiUrl, token, userId, receiverId }) {
 
     const startConnection = async () => {
       try {
+        setLoading(true);
         await hubConnection.start();
-        console.log("Connected to chathub");
         setConnection(hubConnection);
-
-        const res = await axios.get(
-          `${apiUrl}/api/chat/${userId}/${receiverId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setMessages(res.data);
+        api
+          .get(`${apiUrl}/api/chat/${userId}/${receiverId}`)
+          .then((res) => setMessages(res.data))
+          .finally(() => setLoading(false));
       } catch (err) {
         console.error("SignalR connection error:", err);
       }
@@ -141,7 +138,17 @@ export default function useChatHub({ apiUrl, token, userId, receiverId }) {
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        Alert("تنبيه", "برجاء الموافقة علي الاذونات لاستكمال العملية");
+        Toast.show({
+          type: "info",
+          text1: "تنبيه",
+          text2: "برجاء الموافقة علي الاذونات لاستكمال العملية",
+          text1Style: {
+            textAlign: "right",
+          },
+          text2Style: {
+            textAlign: "right",
+          },
+        });
         return;
       }
       result = await ImagePicker.launchImageLibraryAsync({
@@ -188,5 +195,6 @@ export default function useChatHub({ apiUrl, token, userId, receiverId }) {
     sendMessage,
     sendTyping,
     sendFileMessage,
+    messagesLoading: loading,
   };
 }

@@ -1,18 +1,20 @@
-import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import InputField from "@/components/InputField";
 import { ThemeContext } from "@/context/ThemeContext";
 import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
+import { useApi } from "@/hooks/useApi";
 import { fonts } from "@/theme/fonts";
+import { registerForPushNotificationsAsync } from "@/utility/pushNotifications";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import axios from "axios";
 import { Link, useRouter } from "expo-router";
 import { useContext, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Image,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -21,14 +23,17 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 const logo = require("../assets/images/logo.png");
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
 export default function LoginPage() {
   const router = useRouter();
-  const { setToken } = useToken();
+  const { setToken, token } = useToken();
   const { updateUser } = useUser();
+  const api = useApi();
   const [showPassword, setShowPassword] = useState(true);
-  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
+  const { colorScheme } = useContext(ThemeContext);
   const [loading, setLoading] = useState(false);
   const {
     control,
@@ -40,37 +45,81 @@ export default function LoginPage() {
       Password: "",
     },
   });
-  const onSubmit = async (data) => {
+  const onSubmit = (data) => {
     setLoading(true);
-    await axios({
-      method: "post",
-      url: `${apiUrl}/api/user/login`,
-      data: data,
-    })
+    api
+      .post("/api/user/login", data)
       .then(async (res) => {
-        try {
-          if (res.data.token && res.data.code === "LOGIN_SUCCESSFUL") {
-            await setToken(res.data.token);
-            updateUser(res.data.user);
-            router.replace("/");
-          }
-        } catch (err) {
-          Alert("Error", err);
+        if (res.data.code === "LOGIN_SUCCESSFUL") {
+          await setToken(res.data.token);
+          updateUser(res.data.user);
+          Toast.show({
+            type: "success",
+            text1: "نجحت العملية",
+            text2: "تم تسجيل الدخول بنجاح",
+            text1Style: {
+              textAlign: "right",
+            },
+            text2Style: {
+              textAlign: "right",
+            },
+          });
+          await registerForPushNotificationsAsync(apiUrl, res.data.token);
+          router.replace("/");
         }
       })
       .catch((err) => {
-        if (err.response && err.response.data) {
-          Alert(
-            "Error",
-            err.response.data?.message || JSON.stringify(err.response.data)
-          );
-        } else if (err.request) {
-          Alert(
-            "Network Error",
-            "Unable to reach the server. Please check your connection."
-          );
+        const code = err.response?.data.code;
+        if (code === "INVALID_CREDENTIALS") {
+          Toast.show({
+            type: "error",
+            text1: "تعذّر تسجيل الدخول",
+            text2:
+              "يرجى التأكد من إدخال البريد الإلكتروني وكلمة المرور بشكل صحيح.",
+            text1Style: {
+              textAlign: "right",
+            },
+            text2Style: {
+              textAlign: "right",
+            },
+          });
+        } else if (code === "EMAIL_NOT_CONFIRMED") {
+          Toast.show({
+            type: "error",
+            text1: "تعذّر تسجيل الدخول",
+            text2: "يرجى تأكيد بريدك الإلكتروني قبل تسجيل الدخول.",
+            text1Style: {
+              textAlign: "right",
+            },
+            text2Style: {
+              textAlign: "right",
+            },
+          });
+        } else if (code === "EMAIL_NOT_CONFIRMED") {
+          Toast.show({
+            type: "error",
+            text1: "تم حظر الحساب",
+            text2: "يرجى التواصل مع فريق الدعم للحصول على المساعدة.",
+            text1Style: {
+              textAlign: "right",
+            },
+            text2Style: {
+              textAlign: "right",
+            },
+          });
         } else {
-          Alert("Error", "Something went wrong. Please try again later.");
+          console.log(err);
+          Toast.show({
+            type: "error",
+            text1: "حدث خطأ غير متوقع",
+            text2: "يرجى المحاولة مرة أخرى لاحقًا.",
+            text1Style: {
+              textAlign: "right",
+            },
+            text2Style: {
+              textAlign: "right",
+            },
+          });
         }
       })
       .finally(() => setLoading(false));
@@ -80,6 +129,10 @@ export default function LoginPage() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <ScrollView>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.formContainer}
+          ></KeyboardAvoidingView>
           <Image source={logo} style={styles.logo} />
           <Controller
             control={control}
@@ -140,7 +193,9 @@ export default function LoginPage() {
               width: "100%",
             }}
           >
-            <Link style={styles.forgetPasswordLink} href="/">
+            <KeyboardAvoidingView />
+
+            <Link style={styles.forgetPasswordLink} href="">
               هل نسيت كلمة السر؟
             </Link>
             {errors.Password && (
@@ -180,10 +235,9 @@ export default function LoginPage() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    justifyContent: "center",
   },
-  container: {
-    marginTop: 180,
-  },
+
   logo: {
     marginHorizontal: "auto",
   },

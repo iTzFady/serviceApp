@@ -1,7 +1,7 @@
 import { fonts } from "@/theme/fonts";
 import { shadow } from "@/theme/styles";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import {
   Image,
   Linking,
@@ -13,22 +13,26 @@ import {
 const defaultProfilePic = require("@/assets/images/default-profile.png");
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-function MiniRequest({ name, profilePicUrl, rating, status, phoneNumber }) {
+function MiniRequest({
+  id,
+  name,
+  profilePicUrl,
+  rating,
+  status,
+  phoneNumber,
+  router,
+}) {
+  const handlePress = useCallback(() => {
+    router.push({
+      pathname: `/chat/${id}`,
+    });
+  }, [router]);
   const openDialer = () => {
     Linking.canOpenURL(`tel:${phoneNumber}`).then((supported) => {
       if (supported) {
         Linking.openURL(`tel:${phoneNumber}`);
       } else {
         console.log("Dialer not supported on this device");
-      }
-    });
-  };
-  const openMessenger = () => {
-    Linking.canOpenURL(`sms:${phoneNumber}`).then((supported) => {
-      if (supported) {
-        Linking.openURL(`sms:${phoneNumber}`);
-      } else {
-        console.log("Messenger not supported on this device");
       }
     });
   };
@@ -88,7 +92,7 @@ function MiniRequest({ name, profilePicUrl, rating, status, phoneNumber }) {
         </Text>
         {status === "Accepted" ? (
           <>
-            <TouchableOpacity onPress={openMessenger}>
+            <TouchableOpacity onPress={handlePress}>
               <MaterialCommunityIcons
                 name="message-reply-text"
                 size={18}

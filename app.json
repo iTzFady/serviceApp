@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "شغلني",
-    "slug": "serviceApp",
+    "slug": "serviceapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -45,6 +45,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1b748b09-25ac-4037-9d22-4d8bdd4eada7"
+      }
+    },
+    "owner": "faaady"
   }
 }

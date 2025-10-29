@@ -27,16 +27,12 @@ export default function ConversationPopup({
       }
     });
   }, [phoneNumber]);
-  const handlePress = useCallback(
-    (name, profilePicture) => {
-      setShow(false);
-      router.push({
-        pathname: `/chat/${requestedBy.id}`,
-        params: { name, profilePicture },
-      });
-    },
-    [router]
-  );
+  const handlePress = useCallback(() => {
+    setShow(false);
+    router.push({
+      pathname: `/chat/${requestedBy.id}`,
+    });
+  }, [router]);
   return (
     <SafeAreaView>
       <Modal visible={show} transparent={true} animationType="fade">

@@ -1,4 +1,4 @@
-import { default as Alert, default as AlertMessage } from "@/components/Alert";
+import FilterSection from "@/components/FilterSection";
 import MiniRequest from "@/components/MiniRequest";
 import SearchBar from "@/components/SearchBar";
 import UserModal from "@/components/UserModal";
@@ -9,18 +9,13 @@ import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
 import { useFetchUserData } from "@/hooks/useFetchUserData";
 import { fonts } from "@/theme/fonts";
+import { centerContainer, shadow } from "@/theme/styles";
 import { Entypo, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import Animated, { LinearTransition } from "react-native-reanimated";
-
-import FilterSection from "@/components/FilterSection";
-import { shadow } from "@/theme/styles";
 import {
   ActivityIndicator,
-  FlatList,
   Image,
-  Platform,
   Pressable,
   StatusBar,
   StyleSheet,
@@ -28,6 +23,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Animated, { LinearTransition } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 const logo = require("../assets/images/logo.png");
 export default function Index() {
@@ -43,63 +39,54 @@ export default function Index() {
   const router = useRouter();
   useEffect(() => {
     const checkToken = async () => {
-      if (!token) router.replace("/login");
-      else setToken(token.trim());
+      if (!token) {
+        router.replace("/login");
+        return;
+      }
+      const trimmedToken = token.trim();
+      if (token !== trimmedToken) {
+        setToken(trimmedToken);
+      }
     };
+
     checkToken();
-  }, [router]);
+  }, [router, token, setToken]);
 
   useEffect(() => {
-    if (!events.length) return;
-    const latest = events[events.length - 1];
-    setRequests((prevRequests) => {
-      if (!prevRequests || prevRequests.length === 0) return prevRequests;
+    try {
+      if (!events.length) return;
+      const latest = events[events.length - 1];
+      setRequests((prevRequests) => {
+        if (!prevRequests || prevRequests.length === 0) return prevRequests;
 
-      switch (latest.type) {
-        case "Accepted": {
-          return prevRequests.map((req) =>
-            req.id === latest.data.requestId
-              ? { ...req, status: "Accepted" }
-              : req
-          );
+        switch (latest.type) {
+          case "Accepted": {
+            return prevRequests.map((req) =>
+              req.id === latest.data.requestId
+                ? { ...req, status: "Accepted" }
+                : req
+            );
+          }
+          case "Rejected":
+          case "Cancelled":
+          case "Completed": {
+            return prevRequests.filter(
+              (req) => req.id !== latest.data.requestId
+            );
+          }
+          default:
+            return prevRequests;
         }
-        case "Rejected":
-        case "Cancelled":
-        case "Completed": {
-          return prevRequests.filter((req) => req.id !== latest.data.requestId);
-        }
-        default:
-          return prevRequests;
-      }
-    });
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }, [events]);
 
-  const handleError = useCallback((err) => {
-    if (err.status === 401) {
-      AlertMessage(
-        "Session Expired",
-        "You must re-login because session ended"
-      );
-      removeToken();
-      router.replace("/login");
-    }
-    if (err.response && err.response.data)
-      Alert(
-        "Error",
-        err.response.data?.message || JSON.stringify(err.response.data)
-      );
-    else if (err.request)
-      Alert(
-        "Network Error",
-        "Unable to reach the server. Please check your connection."
-      );
-    else Alert("Error", "Something went wrong. Please try again later.");
-  }, []);
   const handlePress = useCallback(
-    (id, name, job, rating, profilePicture) => {
+    (id) => {
       router.push({
         pathname: `/requestWorker/${id}`,
-        params: { name, job, rating, profilePicture },
       });
     },
     [router]
@@ -117,13 +104,7 @@ export default function Index() {
   const renderItem = useCallback(
     ({ item }) => {
       const pressHandler = () => {
-        handlePress(
-          item.id,
-          item.name,
-          item.workerSpecialty,
-          item.averageRating,
-          item.profilePictureUrl
-        );
+        handlePress(item.id);
       };
       return (
         <WorkerCard
@@ -170,86 +151,82 @@ export default function Index() {
           </TouchableOpacity>
         ) : null}
       </View>
-      <View style={styles.container}>
-        <Text style={styles.welcomeText}>مرحبا، {user?.name}</Text>
-        <View style={styles.topBar}>
-          <SearchBar
-            handlePress={() => handleSearch(query)}
-            handleChangeText={setQuery}
-          />
-          <Pressable style={styles.requestButton}>
-            <Entypo
-              style={{ marginRight: 10 }}
-              name="text-document"
-              size={14}
-              color="black"
-            />
-            <Text style={styles.requestButtonText}>طلب خدمه</Text>
-          </Pressable>
-        </View>
-        <FilterSection
-          setSelectedChip={setSelectedChip}
-          setCurrentRegion={setCurrentRegion}
-          selectedChip={selectedChip}
+      <Text style={styles.welcomeText}>مرحبا، {user?.name}</Text>
+      <View style={styles.topBar}>
+        <SearchBar
+          handlePress={() => handleSearch(query)}
+          handleChangeText={setQuery}
+          value={query}
         />
-        {requests.length > 0 ? (
-          <View style={styles.workerCategory}>
-            <View style={styles.category}>
-              <Text style={styles.categoryRightText}>
-                تم الارسال الطلب ....
-              </Text>
-              <TouchableOpacity onPress={() => router.push("/clientRequests")}>
-                <Text style={styles.categoryLeftText}>
-                  عرض كل الطلبات الجارية
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <MiniRequest
-              name={requests.at(0).requestedFor.name}
-              rating={requests.at(0).requestedFor.rating}
-              status={requests.at(0).status}
-              phoneNumber={requests.at(0).requestedFor.phoneNumber}
-              profilePicUrl={requests.at(0).requestedFor.profilePictureUrl}
-            />
-          </View>
-        ) : null}
+        <Pressable style={styles.requestButton}>
+          <Entypo
+            style={{ marginRight: 10 }}
+            name="text-document"
+            size={14}
+            color="black"
+          />
+          <Text style={styles.requestButtonText}>طلب خدمه</Text>
+        </Pressable>
+      </View>
+      <FilterSection
+        setSelectedChip={setSelectedChip}
+        setCurrentRegion={setCurrentRegion}
+        selectedChip={selectedChip}
+      />
+      {requests.length > 0 ? (
         <View style={styles.workerCategory}>
           <View style={styles.category}>
-            <Text style={styles.categoryRightText}>الصنايعه المتاحيين...</Text>
-            <Text style={styles.categoryLeftText}>متاح الان</Text>
+            <Text style={styles.categoryRightText}>تم الارسال الطلب ....</Text>
+            <TouchableOpacity onPress={() => router.push("/clientRequests")}>
+              <Text style={styles.categoryLeftText}>
+                عرض كل الطلبات الجارية
+              </Text>
+            </TouchableOpacity>
           </View>
-          {loading ? (
-            <ActivityIndicator size="large" color="green" />
-          ) : !workers.length ? (
-            <Text>لا يوجد صنايعية في الوقت الحالي</Text>
-          ) : Platform.OS === "web" ? (
-            <FlatList
-              keyExtractor={keyExtractor}
-              contentContainerStyle={{ height: "70vh" }}
-              renderItem={renderItem}
-              data={filteredWorkers}
-              scrollEnabled={true}
-              showsVerticalScrollIndicator={true}
-              initialNumToRender={8}
-              ListFooterComponent={<View style={{ height: 50 }} />}
-            />
-          ) : (
-            <Animated.FlatList
-              keyExtractor={keyExtractor}
-              itemLayoutAnimation={LinearTransition}
-              renderItem={renderItem}
-              data={filteredWorkers}
-              showsVerticalScrollIndicator={false}
-              initialNumToRender={8}
-              windowSize={5}
-              removeClippedSubviews={true}
-              maxToRenderPerBatch={8}
-              updateCellsBatchingPeriod={50}
-              ListFooterComponent={<View style={{ height: 100 }} />}
-            />
-          )}
+          <MiniRequest
+            id={requests.at(0).requestedFor.id}
+            name={requests.at(0).requestedFor.name}
+            rating={requests.at(0).requestedFor.rating}
+            status={requests.at(0).status}
+            phoneNumber={requests.at(0).requestedFor.phoneNumber}
+            profilePicUrl={requests.at(0).requestedFor.profilePictureUrl}
+            router={router}
+          />
+        </View>
+      ) : null}
+      <View style={styles.workerCategory}>
+        <View style={styles.category}>
+          <Text style={styles.categoryRightText}>الصنايعه المتاحيين...</Text>
+          <Text style={styles.categoryLeftText}>متاح الان</Text>
         </View>
       </View>
+      {loading ? (
+        <View style={centerContainer}>
+          <ActivityIndicator size="large" color="green" />
+        </View>
+      ) : !filteredWorkers.length ? (
+        <View style={centerContainer}>
+          <Text style={{ fontFamily: fonts.light }}>
+            لا يوجد صنايعية في الوقت الحالي
+          </Text>
+        </View>
+      ) : (
+        <Animated.FlatList
+          style={{ paddingHorizontal: 10 }}
+          keyExtractor={keyExtractor}
+          itemLayoutAnimation={LinearTransition}
+          renderItem={renderItem}
+          data={filteredWorkers}
+          showsVerticalScrollIndicator={false}
+          initialNumToRender={8}
+          windowSize={5}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={8}
+          scrollEnabled={true}
+          updateCellsBatchingPeriod={50}
+          ListFooterComponent={<View style={{ height: 20 }} />}
+        />
+      )}
       <UserModal show={showUserModal} setShow={setShowUserModal} />
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </SafeAreaView>
@@ -278,13 +255,11 @@ const styles = StyleSheet.create({
     right: 5,
     marginRight: 20,
   },
-  container: {
-    alignItems: "center",
-  },
   welcomeText: {
     fontFamily: fonts.light,
     fontSize: 12,
     marginBottom: 5,
+    textAlign: "center",
   },
   topBar: {
     width: "100%",

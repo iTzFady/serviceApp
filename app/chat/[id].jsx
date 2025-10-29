@@ -1,13 +1,15 @@
 import Message from "@/components/Message";
 import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
+import { useApi } from "@/hooks/useApi";
 import useChatHub from "@/hooks/useChatHub";
 import { fonts } from "@/theme/fonts";
-import { shadow } from "@/theme/styles";
+import { centerContainer, shadow } from "@/theme/styles";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Animated as anim,
   Image,
   KeyboardAvoidingView,
@@ -26,15 +28,26 @@ const defaultProfilePic = require("@/assets/images/default-profile.png");
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function ChatScreen() {
-  const { id, name, profilePicture } = useLocalSearchParams();
+  const { id } = useLocalSearchParams();
   const { token } = useToken();
   const { user } = useUser();
+  const api = useApi();
   const [text, setText] = useState("");
+  const [worker, setWorker] = useState(null);
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const messagesRef = useRef(null);
   const router = useRouter();
   const scale = new anim.Value(1);
+
+  useEffect(() => {
+    api
+      .get(`/api/user/profile/${id}`)
+      .then((res) => setWorker(res.data))
+      .catch((err) => console.log(err));
+  }, [id]);
+
   const open = (url) => {
     setSelectedImage({ uri: url });
     setVisible(true);
@@ -45,7 +58,6 @@ export default function ChatScreen() {
       })
       .start();
   };
-
   const close = () => {
     anim
       .spring(scale, {
@@ -54,15 +66,19 @@ export default function ChatScreen() {
       })
       .start(() => setVisible(false));
   };
-
-  const { messages, isTyping, sendMessage, sendTyping, sendFileMessage } =
-    useChatHub({
-      apiUrl,
-      token,
-      userId: user?.id,
-      receiverId: id,
-    });
-
+  const {
+    messages,
+    isTyping,
+    sendMessage,
+    sendTyping,
+    sendFileMessage,
+    messagesLoading,
+  } = useChatHub({
+    apiUrl,
+    token,
+    userId: user?.id,
+    receiverId: id,
+  });
   useEffect(() => {
     if (messages.length > 0 && messagesRef.current) {
       messagesRef.current.scrollToEnd({ animated: true });
@@ -84,7 +100,8 @@ export default function ChatScreen() {
     ),
     [user]
   );
-
+  if (!worker)
+    return <ActivityIndicator size="large" style={centerContainer} />;
   return (
     <View style={styles.container}>
       <View style={styles.topStyle}>
@@ -105,12 +122,12 @@ export default function ChatScreen() {
               alt="Profile Picture"
               resizeMode="cover"
               source={
-                profilePicture
-                  ? { uri: `${apiUrl}${profilePicture}` }
+                worker.profilePictureUrl
+                  ? { uri: `${apiUrl}${worker.profilePictureUrl}` }
                   : defaultProfilePic
               }
             />
-            <Text style={styles.topText}>{name} </Text>
+            <Text style={styles.topText}>{worker.name} </Text>
           </View>
         </View>
       </View>
@@ -118,19 +135,29 @@ export default function ChatScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <Animated.FlatList
-          ref={messagesRef}
-          data={messages}
-          renderItem={renderItem}
-          itemLayoutAnimation={LinearTransition}
-          windowSize={10}
-          maxToRenderPerBatch={10}
-          initialNumToRender={20}
-          removeClippedSubviews
-          onEndReachedThreshold={0.1}
-          style={{ flex: 1, padding: 10 }}
-          contentContainerStyle={{ paddingBottom: 10 }}
-        />
+        {messagesLoading ? (
+          <ActivityIndicator size="small" style={centerContainer} />
+        ) : messages.length ? (
+          <Animated.FlatList
+            ref={messagesRef}
+            data={messages}
+            renderItem={renderItem}
+            itemLayoutAnimation={LinearTransition}
+            windowSize={10}
+            maxToRenderPerBatch={10}
+            initialNumToRender={20}
+            removeClippedSubviews
+            onEndReachedThreshold={0.1}
+            style={{ flex: 1, padding: 10 }}
+            contentContainerStyle={{ paddingBottom: 10 }}
+          />
+        ) : (
+          <View style={centerContainer}>
+            <Text style={{ fontFamily: fonts.light }}>
+              يمكنك بدء المحادثة بارسال رسالة
+            </Text>
+          </View>
+        )}
         {isTyping && <Text style={styles.typingIndicator}>يكتب الآن...</Text>}
         <View style={styles.bottomStyle}>
           <TouchableOpacity
@@ -138,6 +165,7 @@ export default function ChatScreen() {
               sendMessage(text);
               setText("");
             }}
+            disabled={loading}
           >
             <MaterialIcons name="send" size={24} color="black" />
           </TouchableOpacity>
@@ -149,7 +177,7 @@ export default function ChatScreen() {
             returnKeyType="send"
             enterKeyHint="send"
           />
-          <TouchableOpacity onPress={sendFileMessage}>
+          <TouchableOpacity onPress={sendFileMessage} disabled={loading}>
             <MaterialIcons name="insert-photo" size={24} color="black" />
           </TouchableOpacity>
         </View>

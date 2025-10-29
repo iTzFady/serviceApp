@@ -1,4 +1,5 @@
 import { useUser } from "@/context/UserContext";
+import { useApi } from "@/hooks/useApi";
 import { fonts } from "@/theme/fonts";
 import { shadow } from "@/theme/styles";
 import { formatTime } from "@/utility/formatTime";
@@ -23,7 +24,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { default as Alert, default as AlertMessage } from "./Alert";
+import Toast from "react-native-toast-message";
 const defaultProfilePic = require("@/assets/images/default-profile.png");
 const screenHeight = Dimensions.get("window").height;
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -51,6 +52,7 @@ export default function RequestModal({
   const [rejectLoading, setRejectLoading] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const api = useApi();
   useEffect(() => {
     if (show) {
       setVisible(true);
@@ -91,19 +93,13 @@ export default function RequestModal({
           removeRequest(request.id);
       })
       .catch((err) => {
-        if (err.response && err.response.data) {
-          Alert(
-            "Error",
-            err.response.data?.message || JSON.stringify(err.response.data)
-          );
-        } else if (err.request) {
-          Alert(
-            "Network Error",
-            "Unable to reach the server. Please check your connection."
-          );
-        } else {
-          Alert("Error", "Something went wrong. Please try again later.");
-        }
+        Toast.show({
+          type: "error",
+          text1: "حدث خطأ ما",
+          text2: "حدث خطأ أثناء معالجة الطلب، يرجى المحاولة مرة أخرى لاحقًا.",
+          text1Style: { textAlign: "right" },
+          text2Style: { textAlign: "right" },
+        });
       })
       .finally(() => {
         setAcceptLoading(false);
@@ -116,7 +112,13 @@ export default function RequestModal({
     if (!token) return;
 
     if (rating === 0)
-      return AlertMessage("Alert", "Please choose rating first");
+      return Toast.show({
+        type: "error",
+        text1: "تنبيه",
+        text2: "يرجى اختيار التقييم أولاً",
+        text1Style: { textAlign: "right" },
+        text2Style: { textAlign: "right" },
+      });
     setAcceptLoading(true);
     const controller = new AbortController();
 
@@ -136,7 +138,13 @@ export default function RequestModal({
       signal: controller.signal,
     })
       .then((res) => {
-        AlertMessage("Successful", "Rating submitted Successfully");
+        Toast.show({
+          type: "success",
+          text1: "تم بنجاح",
+          text2: "تم إرسال التقييم بنجاح",
+          text1Style: { textAlign: "right" },
+          text2Style: { textAlign: "right" },
+        });
         setShow(false);
         setComment("");
         setRequests((prev) =>
@@ -146,15 +154,13 @@ export default function RequestModal({
         );
       })
       .catch((err) => {
-        console.log(err);
-        AlertMessage(
-          "Error",
-          err.response?.data.message
-            ? err.response?.data.message
-            : err.response?.data
-            ? err.response?.data
-            : "Error Occured"
-        );
+        Toast.show({
+          type: "error",
+          text1: "حدث خطأ ما",
+          text2: "حدث خطأ أثناء معالجة الطلب، يرجى المحاولة مرة أخرى لاحقًا.",
+          text1Style: { textAlign: "right" },
+          text2Style: { textAlign: "right" },
+        });
       })
       .finally(() => {
         setAcceptLoading(false);
@@ -164,22 +170,25 @@ export default function RequestModal({
   const handleSubmitReport = async () => {
     if (!token) return;
 
-    if (!comment.trim()) return AlertMessage("Alert", "Please write a report");
+    if (!comment.trim())
+      return Toast.show({
+        type: "error",
+        text1: "تنبيه",
+        text2: "يرجى كتابة الشكوي أولاً",
+        text1Style: { textAlign: "right" },
+        text2Style: { textAlign: "right" },
+      });
     setAcceptLoading(true);
-    const controller = new AbortController();
-    axios({
-      method: "post",
-      url: `${apiUrl}/api/reports/report/${ratedUser}`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
-        report: comment,
-      },
-      signal: controller.signal,
-    })
-      .then((res) => {
-        AlertMessage("Successful", "Report submitted Successfully");
+    api
+      .post(`/api/reports/report/${ratedUser}`, { report: comment })
+      .then(() => {
+        Toast.show({
+          type: "success",
+          text1: "تم بنجاح",
+          text2: "تم إرسال الشكوي بنجاح",
+          text1Style: { textAlign: "right" },
+          text2Style: { textAlign: "right" },
+        });
         setShow(false);
         setComment("");
         setRequests((prev) =>
@@ -192,19 +201,15 @@ export default function RequestModal({
         );
       })
       .catch((err) => {
-        AlertMessage(
-          "Error",
-          err.response?.data.message
-            ? err.response?.data.message
-            : err.response?.data
-            ? err.response?.data
-            : "Error Occured"
-        );
+        Toast.show({
+          type: "error",
+          text1: "فشل الإرسال",
+          text2: "حدث خطأ أثناء إرسال الشكوي، يرجى المحاولة مرة أخرى لاحقًا.",
+          text1Style: { textAlign: "right" },
+          text2Style: { textAlign: "right" },
+        });
       })
-      .finally(() => {
-        setAcceptLoading(false);
-      });
-    return () => controller.abort();
+      .finally(() => setAcceptLoading(false));
   };
   const pendingWorkerRequest = (
     <>

@@ -10,6 +10,7 @@ import {
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
 import {
+  Alert,
   Animated,
   Dimensions,
   Image,
@@ -21,7 +22,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import AlertMessage from "./Alert";
+import Toast from "react-native-toast-message";
 import RatingStars from "./RatingStars";
 const defaultProfilePic = require("@/assets/images/default-profile.png");
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -57,14 +58,40 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
     }).start(() => setShow(false));
   }, [slideAnim, setShow]);
   const handleLogout = useCallback(async () => {
-    try {
-      await removeToken("userToken");
-      updateUser(null);
-    } catch (err) {
-      AlertMessage("Error", err);
-    } finally {
-      router.replace("/login");
-    }
+    Alert.alert(
+      "تأكيد",
+      "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+      [
+        {
+          text: "إلغاء",
+          style: "cancel",
+        },
+        {
+          text: "تأكيد",
+          onPress: async () => {
+            try {
+              await removeToken("userToken");
+              updateUser(null);
+            } catch (err) {
+              Toast.show({
+                type: "success",
+                text1: " حدث خطا ما",
+                text2: "حدث خطا ما خلال عملية تسجيل الخروج",
+                text1Style: {
+                  textAlign: "right",
+                },
+                text2Style: {
+                  textAlign: "right",
+                },
+              });
+            } finally {
+              router.replace("/login");
+            }
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   }, [updateUser]);
 
   return (

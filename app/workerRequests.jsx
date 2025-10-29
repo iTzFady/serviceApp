@@ -1,4 +1,3 @@
-import { default as Alert } from "@/components/Alert";
 import ConversationPopup from "@/components/ConversationPopup";
 import RequestCard from "@/components/RequestCard";
 import RequestModal from "@/components/RequestModal";
@@ -8,20 +7,23 @@ import { useRequestsHub } from "@/context/RequestsHubContext";
 import { ThemeContext } from "@/context/ThemeContext";
 import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
-import { shadow } from "@/theme/styles";
+import { useApi } from "@/hooks/useApi";
+import { fonts } from "@/theme/fonts";
+import { centerContainer, shadow } from "@/theme/styles";
 import { formatTime } from "@/utility/formatTime";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import axios from "axios";
 import { useRouter } from "expo-router";
 import { useCallback, useContext, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
-  Platform,
   StatusBar,
   StyleSheet,
+  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function Request() {
@@ -33,16 +35,31 @@ export default function Request() {
   const [showModal, setShowModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { colorScheme } = useContext(ThemeContext);
+  const [disableSwitch, setDisableSwitch] = useState(false);
+  const api = useApi();
   const [selectedRequest, setSelectedRequest] = useState(null);
   const router = useRouter();
+
   useEffect(() => {
     const checkToken = async () => {
-      if (!token) router.replace("/login");
-      else setToken(token.trim());
+      if (!token) {
+        Toast.show({
+          type: "error",
+          text1: "انتهت الجلسة",
+          text2: "يجب تسجيل الدخول مرة أخرى لأن الجلسة انتهت.",
+        });
+        router.replace("/login");
+        return;
+      }
+      const trimmedToken = token.trim();
+      if (token !== trimmedToken) {
+        setToken(trimmedToken);
+      }
     };
     checkToken();
-  }, [router]);
+  }, [router, token, setToken]);
   useEffect(() => {
     if (user?.isAvailable !== undefined && user?.role === "Worker") {
       setOnline(user.isAvailable);
@@ -50,42 +67,16 @@ export default function Request() {
   }, [user?.isAvailable, user?.role]);
   useEffect(() => {
     if (!token || !user?.id || user?.role === "Client") return;
-    const controller = new AbortController();
     const fetchRequests = async () => {
-      try {
-        axios
-          .get(`${apiUrl}/api/requests/getWorkerRequests`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            signal: controller.signal,
-          })
-          .then((res) => {
-            if (Array.isArray(res.data)) {
-              setRequests(res.data);
-            }
-          });
-      } catch (err) {
-        if (axios.isCancel(err)) return;
-
-        if (err.response && err.response.data) {
-          Alert(
-            "Error",
-            err.response.data?.message || JSON.stringify(err.response.data)
-          );
-        } else if (err.request) {
-          Alert(
-            "Network Error",
-            "Unable to reach the server. Please check your connection."
-          );
-        } else {
-          Alert("Error", "Something went wrong. Please try again later.");
-        }
-      }
+      setLoading(true);
+      api
+        .get("/api/requests/getWorkerRequests")
+        .then((res) => setRequests(res.data))
+        .catch((err) => console.error(err))
+        .finally(() => setLoading(false));
     };
     fetchRequests();
   }, [token, user?.id, user?.role]);
-
   useEffect(() => {
     try {
       if (!events.length) return;
@@ -97,6 +88,25 @@ export default function Request() {
       console.log(err);
     }
   }, [events]);
+
+  const handleToggleState = (value) => {
+    setDisableSwitch(true);
+    api
+      .put("/api/user/availability", value, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((res) => {
+        setOnline(res.data.isAvailable);
+        updateUser({
+          ...user,
+          isAvailable: res.data.isAvailable,
+        });
+      })
+      .catch((err) => console.log(err))
+      .finally(() => setDisableSwitch(false));
+  };
 
   const renderItems = useCallback(({ item }) => {
     return (
@@ -128,7 +138,7 @@ export default function Request() {
   }, []);
   return (
     <View style={styles.safeArea}>
-      <View style={{ backgroundColor: "#Bde3e4" }}>
+      <View style={{ flex: 1 }}>
         <View style={styles.topStyle}>
           <View style={styles.topElements}>
             <TouchableOpacity
@@ -141,43 +151,8 @@ export default function Request() {
               <View style={styles.toggleOnline}>
                 <Switch
                   state={online}
-                  toggleState={(value) => {
-                    axios({
-                      method: "put",
-                      url: `${apiUrl}/api/user/availability`,
-                      data: value,
-                      headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                      },
-                    })
-                      .then((res) => {
-                        setOnline(res.data.isAvailable);
-                        updateUser({
-                          ...user,
-                          isAvailable: res.data.isAvailable,
-                        });
-                      })
-                      .catch((err) => {
-                        if (err.response && err.response.data) {
-                          Alert(
-                            "Error",
-                            err.response.data?.message ||
-                              JSON.stringify(err.response.data)
-                          );
-                        } else if (err.request) {
-                          Alert(
-                            "Network Error",
-                            "Unable to reach the server. Please check your connection."
-                          );
-                        } else {
-                          Alert(
-                            "Error",
-                            "Something went wrong. Please try again later."
-                          );
-                        }
-                      });
-                  }}
+                  toggleState={(value) => handleToggleState(value)}
+                  disabled={disableSwitch}
                 />
               </View>
             ) : null}
@@ -190,22 +165,11 @@ export default function Request() {
             </TouchableOpacity>
           </View>
         </View>
-        {Platform.OS === "web" ? (
-          <FlatList
-            style={styles.container}
-            data={requests}
-            renderItem={renderItems}
-            contentContainerStyle={{ height: "90vh" }}
-            keyExtractor={(item, index) =>
-              item.id?.toString() || index.toString()
-            }
-            showsVerticalScrollIndicator={false}
-            initialNumToRender={8}
-            windowSize={5}
-            removeClippedSubviews={true}
-            ListFooterComponent={<View style={{ height: 50 }} />}
-          />
-        ) : (
+        {loading ? (
+          <View style={centerContainer}>
+            <ActivityIndicator size="small" />
+          </View>
+        ) : requests.length ? (
           <FlatList
             style={styles.container}
             data={requests}
@@ -221,6 +185,12 @@ export default function Request() {
             updateCellsBatchingPeriod={100}
             ListFooterComponent={<View style={{ height: 50 }} />}
           />
+        ) : (
+          <View style={centerContainer}>
+            <Text style={{ fontFamily: fonts.light }}>
+              لا يوجد طلبات في الوقت الحالي
+            </Text>
+          </View>
         )}
       </View>
       <RequestModal

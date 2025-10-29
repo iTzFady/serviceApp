@@ -14,7 +14,7 @@ export const useApi = () => {
     (res) => res,
     (err) => {
       if (err.response?.status === 401) removeToken();
-      return Promise.reject;
+      return Promise.reject(err);
     }
   );
   return api;

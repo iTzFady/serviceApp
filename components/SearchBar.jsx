@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-export default function SearchBar({ handlePress, handleChangeText }) {
+export default function SearchBar({ handlePress, handleChangeText, query }) {
   const [focused, setFocused] = useState(false);
   const [searchBarLayout, setSearchBarLayout] = useState({
     width: 0,
@@ -76,6 +76,7 @@ export default function SearchBar({ handlePress, handleChangeText }) {
           onBlur={() => toggleSearch(false)}
           onSubmitEditing={handlePress}
           onChangeText={handleChangeText}
+          value={query}
         />
       </Animated.View>
     </View>

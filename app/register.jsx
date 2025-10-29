@@ -1,4 +1,3 @@
-import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import DynamicIcon from "@/components/DynamicIcon";
 import InputField from "@/components/InputField";
@@ -7,9 +6,9 @@ import UploadButton from "@/components/UploadImageButton";
 import WebSelect from "@/components/WebSelect";
 
 import { ThemeContext } from "@/context/ThemeContext";
+import { useApi } from "@/hooks/useApi";
 import { fonts } from "@/theme/fonts";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import axios from "axios";
 import { useRouter } from "expo-router";
 import { useContext, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -28,14 +27,17 @@ import {
 import { Dropdown } from "react-native-element-dropdown";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Shadow } from "react-native-shadow-2";
+import Toast from "react-native-toast-message";
 import { Regions } from "../data/regions";
 import { Speciality } from "../data/speciality";
+
 const logo = require("../assets/images/logo.png");
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(true);
-  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
+  const { colorScheme } = useContext(ThemeContext);
+  const api = useApi();
   const [role, setRole] = useState("Client");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -62,10 +64,18 @@ export default function RegisterPage() {
   const onSubmit = async (data) => {
     const payload = { ...data, Role: role };
     if (payload.password !== payload.confirmPassword) {
-      Alert(
-        "Password Mismatch",
-        "Please ensure that both password fields match before continuing."
-      );
+      Toast.show({
+        type: "error",
+        text1: "خطأ في كلمة المرور",
+        text2: "يرجى التأكد من أن كلمة المرور وتأكيدها متطابقتان.",
+        text1Style: {
+          textAlign: "right",
+        },
+        text2Style: {
+          textAlign: "right",
+        },
+      });
+      return;
     }
     const formData = new FormData();
     formData.append("profilePic", payload.image);
@@ -81,37 +91,87 @@ export default function RegisterPage() {
     formData.append("Region", payload.region ? payload.region : null);
     formData.append(
       "WorkerSpecialty",
-      payload.speciality ? payload.speciality : null
+      payload.speciality ? payload.speciality : ""
     );
     setLoading(true);
-    await axios({
-      method: "post",
-      url: `${apiUrl}/api/user/register`,
-      timeout: 0,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      data: formData,
-    })
+    await api
+      .post("/api/user/register", formData, {
+        timeout: 0,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
       .then((res) => {
         if (res.data.code === "REGISTRATION_SUCCESSFUL") {
-          Alert("Message", res.data.message);
+          Toast.show({
+            type: "success",
+            text1: "تم التسجيل بنجاح",
+            text2: "مرحبًا بك في التطبيق!",
+            text1Style: {
+              textAlign: "right",
+            },
+            text2Style: {
+              textAlign: "right",
+            },
+          });
           router.replace("/login");
         }
       })
       .catch((err) => {
-        if (err.response && err.response.data) {
-          Alert(
-            "Error",
-            err.response.data?.message || JSON.stringify(err.response.data)
-          );
-        } else if (err.request) {
-          Alert(
-            "Network Error",
-            "Unable to reach the server. Please check your connection."
-          );
+        const code = err.response.data.code;
+        if (code === "EMAIL_ALREADY_EXISTS") {
+          Toast.show({
+            type: "error",
+            text1: "البريد الإلكتروني مسجل مسبقًا",
+            text2: "يرجى استخدام بريد إلكتروني آخر.",
+            text1Style: { textAlign: "right" },
+            text2Style: { textAlign: "right" },
+          });
+        } else if (code === "INVALID_PHONE_FORMAT") {
+          Toast.show({
+            type: "error",
+            text1: "رقم الهاتف غير صالح",
+            text2: "يجب أن يبدأ بـ 010، 011، 012، أو 015 ويتكون من 11 رقمًا.",
+            text1Style: { textAlign: "right" },
+            text2Style: { textAlign: "right" },
+          });
+        } else if (code === "PHONE_ALREADY_EXISTS") {
+          Toast.show({
+            type: "error",
+            text1: "رقم الهاتف مستخدم مسبقًا",
+            text2: "يرجى استخدام رقم هاتف آخر.",
+            text1Style: { textAlign: "right" },
+            text2Style: { textAlign: "right" },
+          });
+        } else if (code === "INVALID_NATIONAL_NUMBER") {
+          Toast.show({
+            type: "error",
+            text1: "الرقم القومي غير صالح",
+            text2: "يجب أن يبدأ بـ 2 أو 3 ويتكون من 14 رقمًا.",
+            text1Style: { textAlign: "right" },
+            text2Style: { textAlign: "right" },
+          });
+        } else if (code === "NATIONAL_NUMBER_EXISTS") {
+          Toast.show({
+            type: "error",
+            text1: "الرقم القومي مستخدم مسبقًا",
+            text2: "يرجى التحقق من الرقم القومي أو استخدام رقم آخر.",
+            text1Style: { textAlign: "right" },
+            text2Style: { textAlign: "right" },
+          });
         } else {
-          Alert("Error", "Something went wrong. Please try again later.");
+          Toast.show({
+            type: "error",
+            text1: "فشل التسجيل",
+            text2:
+              "يرجى التأكد من إدخال البيانات بشكل صحيح والمحاولة مرة أخرى.",
+            text1Style: {
+              textAlign: "right",
+            },
+            text2Style: {
+              textAlign: "right",
+            },
+          });
         }
       })
       .finally(() => setLoading(false));

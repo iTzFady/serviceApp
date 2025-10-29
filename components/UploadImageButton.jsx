@@ -12,7 +12,8 @@ import {
   Text,
   View,
 } from "react-native";
-import Alert from "./Alert";
+import Toast from "react-native-toast-message";
+
 const defaultProfilePic = require("@/assets/images/default-profile.png");
 
 export default function UploadButton({ value, onChange, type }) {
@@ -53,7 +54,17 @@ export default function UploadButton({ value, onChange, type }) {
         onChange(file);
       }
     } catch (err) {
-      Alert("Error", err);
+      Toast.show({
+        type: "error",
+        text1: "فشلت العملية",
+        text2: "حدث خطا ما في عملية رفع الصورة",
+        text1Style: {
+          textAlign: "right",
+        },
+        text2Style: {
+          textAlign: "right",
+        },
+      });
     } finally {
       setLoading(false);
     }
