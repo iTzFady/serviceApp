@@ -108,7 +108,6 @@ export default function LoginPage() {
             },
           });
         } else {
-          console.log(err);
           Toast.show({
             type: "error",
             text1: "حدث خطأ غير متوقع",

@@ -59,9 +59,9 @@ function AppProviders() {
                 contentStyle: { backgroundColor: "#Bde3e4" },
               }}
             >
-              {/* <Stack.Screen name="intro" />
+              <Stack.Screen name="intro" />
               <Stack.Screen name="login" />
-              <Stack.Screen name="register" /> */}
+              <Stack.Screen name="register" />
               <Stack.Screen name="index" />
               <Stack.Screen name="search" />
               <Stack.Screen name="requestWorker/[id]" />

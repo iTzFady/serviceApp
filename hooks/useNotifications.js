@@ -1,5 +1,4 @@
 import * as Notifications from "expo-notifications";
-import { removeNotificationSubscription } from "expo-notifications";
 import { useEffect, useRef, useState } from "react";
 
 Notifications.setNotificationHandler({
@@ -26,8 +25,9 @@ export function useNotifications() {
         console.log("User tapped notification:", res);
       });
     return () => {
-      removeNotificationSubscription(notificationListener.current);
-      removeNotificationSubscription(responseListener.current);
+      notificationListener.current?.remove();
+      responseListener.current?.remove();
     };
   }, []);
+  return notification;
 }

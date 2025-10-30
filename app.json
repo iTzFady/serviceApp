@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "شغلني",
+    "name": "Service",
     "slug": "serviceapp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -18,8 +18,10 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
+      "usesCleartextTraffic": true,
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.faaady.serviceapp"
     },
     "web": {
       "output": "static",
@@ -33,10 +35,7 @@
           "image": "./assets/images/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "backgroundColor": "#ffffff"
         }
       ],
       "expo-font",
