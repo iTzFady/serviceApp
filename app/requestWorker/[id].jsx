@@ -14,6 +14,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useContext, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -23,13 +24,13 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+
 import Toast from "react-native-toast-message";
 
 const defaultProfilePic = require("@/assets/images/default-profile.png");
@@ -392,6 +393,7 @@ export default function RequestWorker() {
                       multiline
                       numberOfLines={5}
                       textAlignVertical="top"
+                      placeholderTextColor="black"
                     />
                   </View>
                 )}

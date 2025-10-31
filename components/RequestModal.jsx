@@ -461,6 +461,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContent: {
+    ...shadow,
     position: "absolute",
     bottom: 0,
     width: "100%",
@@ -469,7 +470,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 20,
     minHeight: screenHeight * 0.4,
-    ...shadow,
   },
   modalInner: {
     flex: 1,
@@ -534,7 +534,6 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderRadius: 5,
     padding: 8,
-    ...shadow,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -548,7 +547,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 10,
-    ...shadow,
   },
   buttonText: {
     color: "#fff",

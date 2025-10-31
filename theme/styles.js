@@ -5,12 +5,15 @@ export const shadow = {
     web: {
       boxShadow: "0px 4px 4px 0px rgba(0, 0, 0, 0.25)",
     },
-    default: {
+    ios: {
       shadowColor: "#000",
       shadowOffset: { width: 0, height: -2 },
       shadowOpacity: 0.5,
-      shadowRadius: 6,
+      shadowRadius: 3,
+    },
+    android: {
       elevation: 4,
+      backgroundColor: "#Bde3e4",
     },
   }),
 };

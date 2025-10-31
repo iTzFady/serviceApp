@@ -78,6 +78,7 @@ export default function LogCard({
 }
 const styles = StyleSheet.create({
   container: {
+    ...shadow,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -85,7 +86,6 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     borderRadius: 5,
-    ...shadow,
   },
   textContainer: {
     flex: 1,

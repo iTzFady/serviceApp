@@ -2,7 +2,6 @@ import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
 import { fonts } from "@/theme/fonts";
 import {
-  FontAwesome6,
   MaterialCommunityIcons,
   MaterialIcons,
   Octicons,
@@ -157,17 +156,14 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
             <Octicons name="log" size={20} color="black" />
             <Text style={styles.buttonText}>سجل الطلبات</Text>
           </Pressable>
-          <Pressable style={styles.button}>
-            <FontAwesome6 name="user-shield" size={20} color="black" />
-            <Text style={styles.buttonText}>السلامه</Text>
-          </Pressable>
 
-          <Pressable style={styles.button}>
-            <MaterialIcons name="settings" size={20} color="black" />
-            <Text style={styles.buttonText}>الاعدادات</Text>
-          </Pressable>
-
-          <Pressable style={styles.button}>
+          <Pressable
+            style={styles.button}
+            onPress={() => {
+              router.push("/chatHelp");
+              setShow(false);
+            }}
+          >
             <MaterialCommunityIcons
               name="account-question"
               size={20}
@@ -175,7 +171,6 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
             />
             <Text style={styles.buttonText}>مساعده</Text>
           </Pressable>
-
           <Pressable style={styles.button}>
             <MaterialIcons name="support-agent" size={20} color="black" />
             <Text style={styles.buttonText}>الدعم</Text>
@@ -185,7 +180,14 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
             <Text style={styles.buttonText}>تسجيل خروج</Text>
           </Pressable>
         </ScrollView>
-
+        {/* <Pressable style={styles.button}>
+          <FontAwesome6 name="user-shield" size={20} color="black" />
+          <Text style={styles.buttonText}>السلامه</Text>
+        </Pressable> */}
+        {/* <Pressable style={styles.button}>
+            <MaterialIcons name="settings" size={20} color="black" />
+            <Text style={styles.buttonText}>الاعدادات</Text>
+          </Pressable> */}
         <Text style={styles.userType}>
           {user?.role === "Worker" ? "صنايعي" : "عميل"}
         </Text>

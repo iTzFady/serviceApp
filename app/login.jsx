@@ -9,6 +9,7 @@ import { registerForPushNotificationsAsync } from "@/utility/pushNotifications";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Link, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useContext, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -16,12 +17,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 const logo = require("../assets/images/logo.png");
@@ -29,7 +30,7 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setToken, token } = useToken();
+  const { setToken } = useToken();
   const { updateUser } = useUser();
   const api = useApi();
   const [showPassword, setShowPassword] = useState(true);
@@ -108,6 +109,7 @@ export default function LoginPage() {
             },
           });
         } else {
+          console.log(err);
           Toast.show({
             type: "error",
             text1: "حدث خطأ غير متوقع",
@@ -130,70 +132,68 @@ export default function LoginPage() {
         <ScrollView>
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={styles.formContainer}
-          ></KeyboardAvoidingView>
-          <Image source={logo} style={styles.logo} />
-          <Controller
-            control={control}
-            name="Email"
-            rules={{
-              required: "E-mail is required",
-              pattern: { value: /\S+@\S+\.\S+/, message: "Invalid email" },
-            }}
-            render={({ field: { onChange, value } }) => (
-              <InputField
-                text={"البريد الالكتروني"}
-                icon={<FontAwesome name="user-o" size={24} color="black" />}
-                autoCapitalize="none"
-                autoComplete="email"
-                inputMode="email"
-                keyboardType="email-address"
-                placeholder="اكتب بريدك الالكتروني"
-                onChangeText={onChange}
-                value={value}
-              />
+          >
+            <Image source={logo} style={styles.logo} />
+            <Controller
+              control={control}
+              name="Email"
+              rules={{
+                required: "E-mail is required",
+                pattern: { value: /\S+@\S+\.\S+/, message: "Invalid email" },
+              }}
+              render={({ field: { onChange, value } }) => (
+                <InputField
+                  text={"البريد الالكتروني"}
+                  icon={<FontAwesome name="user-o" size={24} color="black" />}
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  inputMode="email"
+                  keyboardType="email-address"
+                  placeholder="اكتب بريدك الالكتروني"
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+            />
+            {errors.Email && (
+              <Text style={styles.error}>{errors.Email.message}</Text>
             )}
-          />
-          {errors.Email && (
-            <Text style={styles.error}>{errors.Email.message}</Text>
-          )}
-          <Controller
-            control={control}
-            name="Password"
-            rules={{ required: "Password is required", minLength: 6 }}
-            render={({ field: { onChange, value } }) => (
-              <InputField
-                text={"كلمة السر"}
-                icon={
-                  <TouchableOpacity
-                    onPress={() => setShowPassword((prevState) => !prevState)}
-                  >
-                    <MaterialCommunityIcons
-                      name={showPassword ? "eye-closed" : "eye-outline"}
-                      size={24}
-                      color="black"
-                    />
-                  </TouchableOpacity>
-                }
-                autoCapitalize="none"
-                autoComplete="none"
-                inputMode="text"
-                keyboardType="text"
-                placeholder="اكتب كلمة السر"
-                secureTextEntry={showPassword}
-                onChangeText={onChange}
-                value={value}
-              />
-            )}
-          />
+            <Controller
+              control={control}
+              name="Password"
+              rules={{ required: "Password is required", minLength: 6 }}
+              render={({ field: { onChange, value } }) => (
+                <InputField
+                  text={"كلمة السر"}
+                  icon={
+                    <TouchableOpacity
+                      onPress={() => setShowPassword((prevState) => !prevState)}
+                    >
+                      <MaterialCommunityIcons
+                        name={showPassword ? "eye-closed" : "eye-outline"}
+                        size={24}
+                        color="black"
+                      />
+                    </TouchableOpacity>
+                  }
+                  autoCapitalize="none"
+                  autoComplete="none"
+                  inputMode="text"
+                  keyboardType="text"
+                  placeholder="اكتب كلمة السر"
+                  secureTextEntry={showPassword}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+            />
+          </KeyboardAvoidingView>
           <View
             style={{
               flexDirection: "row-reverse",
               width: "100%",
             }}
           >
-            <KeyboardAvoidingView />
-
             <Link style={styles.forgetPasswordLink} href="">
               هل نسيت كلمة السر؟
             </Link>
@@ -203,6 +203,7 @@ export default function LoginPage() {
               </Text>
             )}
           </View>
+
           <View style={styles.buttonContainer}>
             <Button
               text="تسجيل الدخول"
@@ -213,7 +214,6 @@ export default function LoginPage() {
               loading={loading}
             />
           </View>
-
           <View
             style={{
               flexDirection: "row-reverse",

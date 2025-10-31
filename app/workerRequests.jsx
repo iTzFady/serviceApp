@@ -13,16 +13,17 @@ import { centerContainer, shadow } from "@/theme/styles";
 import { formatTime } from "@/utility/formatTime";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useCallback, useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
 import Toast from "react-native-toast-message";
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 

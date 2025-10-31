@@ -42,8 +42,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   selected: {
+    ...shadow,
     backgroundColor: "rgba(159, 223, 105, 1)",
     borderWidth: 1,
-    ...shadow,
   },
 });

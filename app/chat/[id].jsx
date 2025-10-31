@@ -202,10 +202,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   topStyle: {
+    ...shadow,
     backgroundColor: "rgba(152, 152, 152, 1)",
     height: 100,
     borderTopWidth: 1,
-    ...shadow,
   },
   topElement: {
     flexDirection: "row-reverse",
@@ -235,6 +235,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
   },
   bottomStyle: {
+    ...shadow,
     flexDirection: "row-reverse",
     width: "100%",
     height: 70,
@@ -244,9 +245,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(152, 152, 152, 1)",
     borderBottomWidth: 1,
-    ...shadow,
   },
   textInput: {
+    ...shadow,
     height: 30,
     backgroundColor: "#fff",
     flex: 1,
@@ -255,7 +256,6 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     borderRadius: 8,
     fontFamily: fonts.light,
-    ...shadow,
   },
   message: {
     marginVertical: 4,

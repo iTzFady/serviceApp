@@ -85,13 +85,13 @@ export default function SearchBar({ handlePress, handleChangeText, query }) {
 
 const styles = StyleSheet.create({
   searchContainer: {
+    ...shadow,
     flexDirection: "row-reverse",
     alignItems: "center",
     backgroundColor: "#fff",
     borderRadius: 5,
     flex: 1,
     height: 25,
-    ...shadow,
   },
   input: {
     fontSize: 12,

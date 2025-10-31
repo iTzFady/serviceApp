@@ -55,7 +55,7 @@ function AppProviders() {
             <Stack
               screenOptions={{
                 headerShown: false,
-                animation: "fade",
+                animation: "fade_from_bottom",
                 contentStyle: { backgroundColor: "#Bde3e4" },
               }}
             >
@@ -67,6 +67,7 @@ function AppProviders() {
               <Stack.Screen name="requestWorker/[id]" />
               <Stack.Screen name="chat/[id]" />
               <Stack.Screen name="workerRequests" />
+              <Stack.Screen name="chatHelp" />
             </Stack>
             <Toast />
           </SafeAreaProvider>

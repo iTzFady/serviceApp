@@ -5,17 +5,18 @@ import { fonts } from "@/theme/fonts";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useContext, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
 import AppIntroSlider from "react-native-app-intro-slider";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { slides } from "../data/slides";
@@ -26,7 +27,6 @@ const { width, height } = Dimensions.get("window");
 export default function IntroScreen() {
   const router = useRouter();
   const [index, setIndex] = useState(0);
-  const [showApp, setShowApp] = useState(false);
   const [loading, setLoading] = useState(true);
   const sliderRef = useRef(null);
   const { colorScheme } = useContext(ThemeContext);
@@ -34,13 +34,13 @@ export default function IntroScreen() {
     const checkIntro = async () => {
       const hasSeenIntro = await AsyncStorage.getItem("hasSeenIntro");
       if (hasSeenIntro) {
-        setShowApp(true);
         router.replace("/login");
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     };
     checkIntro();
-  }, []);
+  }, [router]);
 
   if (loading) {
     return (
@@ -159,7 +159,7 @@ export default function IntroScreen() {
           </TouchableOpacity>
         )}
       </View>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ flex: 1 }}>
         <AppIntroSlider
           ref={sliderRef}
           data={slides}
@@ -187,7 +187,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 15,
   },
-
   logo: {
     width: 110,
     marginHorizontal: "auto",
@@ -239,6 +238,5 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     paddingHorizontal: width * 0.05,
-    width: "100%",
   },
 });

@@ -12,17 +12,18 @@ import { fonts } from "@/theme/fonts";
 import { centerContainer, shadow } from "@/theme/styles";
 import { Entypo, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Image,
   Pressable,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 const logo = require("../assets/images/logo.png");
@@ -268,13 +269,13 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   requestButton: {
+    ...shadow,
     flex: 1,
     height: 25,
     flexDirection: "row-reverse",
     alignItems: "center",
     backgroundColor: "rgba(175, 237, 123, 1)",
     borderRadius: 5,
-    ...shadow,
   },
   requestButtonText: {
     fontFamily: fonts.light,

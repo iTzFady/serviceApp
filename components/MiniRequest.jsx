@@ -146,6 +146,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   requestInfo: {
+    ...shadow,
     backgroundColor: "white",
     width: "55%",
     height: 35,
@@ -154,7 +155,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 9,
     paddingVertical: 2,
-    ...shadow,
   },
   requestStatus: {
     flexDirection: "row-reverse",

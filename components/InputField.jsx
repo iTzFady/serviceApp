@@ -34,7 +34,9 @@ export default function InputField({
             secureTextEntry={secureTextEntry}
             onChangeText={onChangeText}
             placeholder={placeholder}
+            placeholderTextColor="black"
             value={value}
+            textAlignVertical="center"
           ></TextInput>
           {icon}
         </View>

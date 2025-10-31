@@ -117,6 +117,7 @@ export default function UploadButton({ value, onChange, type }) {
 }
 const styles = StyleSheet.create({
   uploadButton: {
+    ...shadow,
     width: "100%",
     height: 40,
     alignItems: "center",
@@ -124,7 +125,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(0, 0, 0, 0.5)",
     backgroundColor: "rgba(165, 234, 237, 0.88)",
-    ...shadow,
   },
   uploadButtonText: {
     fontSize: 20,

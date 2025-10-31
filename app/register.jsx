@@ -10,6 +10,7 @@ import { useApi } from "@/hooks/useApi";
 import { fonts } from "@/theme/fonts";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useContext, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -18,12 +19,12 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
 import { Dropdown } from "react-native-element-dropdown";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Shadow } from "react-native-shadow-2";
@@ -32,7 +33,6 @@ import { Regions } from "../data/regions";
 import { Speciality } from "../data/speciality";
 
 const logo = require("../assets/images/logo.png");
-const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(true);
@@ -75,7 +75,6 @@ export default function RegisterPage() {
           textAlign: "right",
         },
       });
-      return;
     }
     const formData = new FormData();
     formData.append("profilePic", payload.image);
@@ -570,6 +569,7 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     height: 45,
+
     flexDirection: "column",
     alignItems: "center",
     alignContent: "center",

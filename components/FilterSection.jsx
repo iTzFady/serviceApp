@@ -118,12 +118,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   dropdown: {
+    ...shadow,
     width: "100%",
     backgroundColor: "#fff",
     borderRadius: 5,
     marginBlock: 10,
     height: 25,
-    ...shadow,
   },
   dropdownSelectText: {
     color: "#000",

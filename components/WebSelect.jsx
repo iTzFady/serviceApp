@@ -24,10 +24,10 @@ function WebSelect({ data, value, onChange, label, placeHolder }) {
 }
 const styles = StyleSheet.create({
   containter: {
+    ...shadow,
     width: "95%",
     marginTop: 10,
     alignSelf: "center",
-    ...shadow,
   },
   label: {
     textAlign: "right",
