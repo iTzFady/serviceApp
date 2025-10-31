@@ -1,7 +1,7 @@
 import { fonts } from "@/theme/fonts";
-import { shadow } from "@/theme/styles";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { memo, useCallback } from "react";
+
 import {
   Image,
   Linking,
@@ -26,7 +26,7 @@ function MiniRequest({
     router.push({
       pathname: `/chat/${id}`,
     });
-  }, [router]);
+  }, [router, id]);
   const openDialer = () => {
     Linking.canOpenURL(`tel:${phoneNumber}`).then((supported) => {
       if (supported) {
@@ -146,7 +146,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   requestInfo: {
-    ...shadow,
     backgroundColor: "white",
     width: "55%",
     height: 35,

@@ -1,3 +1,4 @@
+import TypingBubble from "@/components/TypingBubble";
 import { fonts } from "@/theme/fonts";
 import { shadow } from "@/theme/styles";
 import { getHelp } from "@/utility/aiHub";
@@ -99,7 +100,7 @@ export default function ChatHelp() {
           contentContainerStyle={{ padding: 10 }}
           onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
         />
-
+        {isStreaming && <TypingBubble />}
         <View style={styles.inputContainer}>
           <TextInput
             value={input}

@@ -1,4 +1,5 @@
 import Message from "@/components/Message";
+import TypingBubble from "@/components/TypingBubble";
 import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
 import { useApi } from "@/hooks/useApi";
@@ -158,7 +159,7 @@ export default function ChatScreen() {
             </Text>
           </View>
         )}
-        {isTyping && <Text style={styles.typingIndicator}>يكتب الآن...</Text>}
+        {isTyping && <TypingBubble />}
         <View style={styles.bottomStyle}>
           <TouchableOpacity
             onPress={() => {
@@ -271,13 +272,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     backgroundColor: "#2196F3",
   },
-  typingIndicator: {
-    textAlign: "center",
-    fontSize: 12,
-    color: "#555",
-    fontFamily: fonts.light,
-    marginBottom: 4,
-  },
+
   thumbnail: {
     width: 150,
     height: 150,
