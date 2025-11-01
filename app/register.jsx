@@ -117,6 +117,7 @@ export default function RegisterPage() {
         }
       })
       .catch((err) => {
+        console.log(err);
         const code = err.response.data.code;
         if (code === "EMAIL_ALREADY_EXISTS") {
           Toast.show({

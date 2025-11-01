@@ -1,5 +1,4 @@
 import * as SignalR from "@microsoft/signalr";
-import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useRef, useState } from "react";
 import { LayoutAnimation } from "react-native";
@@ -11,6 +10,7 @@ export default function useChatHub({ apiUrl, token, userId, receiverId }) {
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const api = useApi();
   const typingTimeout = useRef(null);
 
@@ -165,10 +165,10 @@ export default function useChatHub({ apiUrl, token, userId, receiverId }) {
         type: asset.mimeType || "application/octet-stream",
         name: asset.fileName || "upload",
       });
-      const res = await axios.post(`${apiUrl}/api/chat/upload`, formData, {
+      setImageUploading(true);
+      const res = await api.post(`/api/chat/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
         },
       });
       const fileUrl = res.data.url;
@@ -187,6 +187,8 @@ export default function useChatHub({ apiUrl, token, userId, receiverId }) {
       ]);
     } catch (err) {
       console.log(err);
+    } finally {
+      setImageUploading(false);
     }
   };
   return {
@@ -196,5 +198,6 @@ export default function useChatHub({ apiUrl, token, userId, receiverId }) {
     sendTyping,
     sendFileMessage,
     messagesLoading: loading,
+    imageUploading: imageUploading,
   };
 }

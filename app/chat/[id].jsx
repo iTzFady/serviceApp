@@ -48,7 +48,6 @@ export default function ChatScreen() {
       .then((res) => setWorker(res.data))
       .catch((err) => console.log(err));
   }, [id]);
-
   const open = (url) => {
     setSelectedImage({ uri: url });
     setVisible(true);
@@ -74,6 +73,7 @@ export default function ChatScreen() {
     sendTyping,
     sendFileMessage,
     messagesLoading,
+    imageUploading,
   } = useChatHub({
     apiUrl,
     token,
@@ -178,8 +178,12 @@ export default function ChatScreen() {
             returnKeyType="send"
             enterKeyHint="send"
           />
-          <TouchableOpacity onPress={sendFileMessage} disabled={loading}>
-            <MaterialIcons name="insert-photo" size={24} color="black" />
+          <TouchableOpacity onPress={sendFileMessage} disabled={imageUploading}>
+            {imageUploading ? (
+              <ActivityIndicator color="black" />
+            ) : (
+              <MaterialIcons name="insert-photo" size={24} color="black" />
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

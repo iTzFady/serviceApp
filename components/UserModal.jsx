@@ -1,5 +1,6 @@
 import { useToken } from "@/context/TokenContext";
 import { useUser } from "@/context/UserContext";
+import { useApi } from "@/hooks/useApi";
 import { fonts } from "@/theme/fonts";
 import {
   MaterialCommunityIcons,
@@ -30,6 +31,7 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
   const slideAnim = useRef(new Animated.Value(width)).current;
   const router = useRouter();
   const { user, updateUser } = useUser();
+  const api = useApi();
   const { removeToken } = useToken();
   useEffect(() => {
     if (show) {
@@ -69,9 +71,11 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
           text: "تأكيد",
           onPress: async () => {
             try {
+              api.delete("/api/user/deleteToken");
               await removeToken("userToken");
               updateUser(null);
             } catch (err) {
+              console.log(err.code);
               Toast.show({
                 type: "success",
                 text1: " حدث خطا ما",
@@ -142,7 +146,13 @@ export default function RequestModal({ show, setShow, userType = "worker" }) {
           <MaterialIcons name="arrow-back-ios" size={20} color="black" />
         </TouchableOpacity>
         <ScrollView style={styles.buttonsContainer}>
-          <Pressable style={styles.button}>
+          <Pressable
+            style={styles.button}
+            onPress={() => {
+              router.push("/notifications");
+              setShow(false);
+            }}
+          >
             <MaterialCommunityIcons name="bell" size={20} color="black" />
             <Text style={styles.buttonText}>الاشعارات</Text>
           </Pressable>

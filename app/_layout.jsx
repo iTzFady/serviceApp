@@ -68,6 +68,7 @@ function AppProviders() {
               <Stack.Screen name="chat/[id]" />
               <Stack.Screen name="workerRequests" />
               <Stack.Screen name="chatHelp" />
+              <Stack.Screen name="notifications" />
             </Stack>
             <Toast />
           </SafeAreaProvider>
